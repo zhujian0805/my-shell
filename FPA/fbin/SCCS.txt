@@ -1,0 +1,42 @@
+#!/bin/ksh
+#--------------------------- COPYRIGHT NOTICE ----------------------------------
+#*******************************************************************************
+#
+# Copyright (c) 2000 Perot Systems Corporation 
+# All Rights Reserved
+# Copyright Notice Does Not Imply Publication
+#
+#*******************************************************************************
+# SCCS_ID: %Z% %M% %I% %G%
+#*******************************************************************************
+#
+#  NAME:              FPAcheckout.ksh 
+#
+#  DESCRIPTION:       This module checks out a file from SCCS into the 
+#                     ${BATCH_HOME}/output directory.
+#  
+#  EXT DATA FILES: 
+#
+#  ENV VARIABLES:   
+#   
+#  INPUT:            
+#
+#  OUTPUT:            
+#
+#  TEMPORARY FILES:    
+#
+#  EXT FUNC CALLS:     
+#
+#  EXT MOD CALLS:      
+#
+#*******************************************************************************
+# Date         Programmmer      Description
+# ----------   --------------   ------------------------------------------
+#                               New code. 
+#
+#
+# SCCS_COMMENT: Original code checkin.
+#
+#***    ALWAYS UPDATE THE SCCS_COMMENT BEFORE CHECKING THE CODE INTO SCCS     **
+#*******************************************************************************
+

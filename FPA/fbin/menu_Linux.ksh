@@ -1,0 +1,883 @@
+#!/bin/ksh
+#--------------------------- COPYRIGHT NOTICE ----------------------------------
+#*******************************************************************************
+#
+# Copyright (c) 2001 Perot Systems Corporation
+# All Rights Reserved
+# Copyright Notice Does Not Imply Publication
+#
+#*******************************************************************************
+#
+#  NAME:               menu.ksh
+#
+#  DESCRIPTION:        This is a simple programm to display the
+# menu for the Wellpoint command functions needed
+# to support this Diamond Implementation # # The supporting control file will hold all the information
+# needed to derive parameters, execution string and success return code.
+#
+# Don't expect logic in this except for the minimal error trapping.
+#
+# Basically, you the developer are on your own when it comes to execution,
+#   user interaction will be taken care of.  Think of it as OOP under KSH!
+#
+# Couple notes:
+# 1) All you Awk coders - shaddup!  This is my first functional use of awk
+#                         besides a flat hack.
+# 2) The menu.dat file - the current design is pretty flexible, thought
+#                         if you find a better way to do it, please email me
+#                          at lkammer@att.net
+# 3) Perl              - It would have made sense to implement this under
+#                        perl or tc/tkl, but since the host system is unknown
+#                        I figured I had more chance of less errors with ksh
+# 4) menu.dat layout : The menu file has 6 standard positions and N parameters
+#                      each item is separated by a :
+#                       the Parm elements are separated by a !
+#
+#
+#  EXT DATA FILES:     menu.dat
+#                      The menu.dat file has 6 standard positions and 
+#                      N parameter groups.  
+#                      The standard positions and parameter groups are colon delimited, ":"
+#                      The parameter elements within each parameter group are bang delimited, "!"
+#                
+#                      POS1:POS2:POS3:POS4:POS5:POS6:PARM1!R!DFLT:PARM2!R!DFLT
+#                   
+#                      POS1 : The name of the application e.g. AVSUP or DFTLIP 
+#                      POS2 : The Menu Descrition of the application.  
+#                      POS3 : The execution description.... e.g. Executing AVSUP...
+#                      POS4 : The actual command line.  All Parms will be added at the end.
+#                      POS5 : The default prefix for output files -- the string NULL indicates no prefix.
+#                      POS6 : The failure return code ( not currently supported )
+#                      PARM1!Y!DFLT
+#                         PARM1 : The menu name of the parameter
+#                             R : Is this parm required ( Y / N ) ( Not currently supported )
+#                          DFLT : The default value for this parm 
+#                   
+#                      The parm groups are repeating N times.  Its not required, but suggested
+#                       that you do not end the menu line with a :
+#                   
+#                
+#                
+#  ENV VARIABLES:      MENUSYS_HOME      Directory for the menu application
+#                      MENUSYS_BIN       Directory containing menu executables
+#                      MENUSYS_ETC       Directory containing menu configuration data
+#                      MENUSYS_LOGS      Directory containing the log files.
+#                      MENUSYS_DEFAULTMENU   Name of the initial menu dat file (optional)
+#                                      
+#                      
+#                      
+#  INPUT:              system variables like ${$} and ${0}
+#
+#
+#  OUTPUT:             Writes messages to 
+#                      
+#
+#  TEMPORARY FILES:    N/A
+#
+#  EXT FUNC CALLS:     N/A
+#
+#  EXT MOD CALLS:      N/A
+#
+#*******************************************************************************
+# Date         Programmmer        Description
+# ----------   -----------------  ------------------------------------------
+# 09/18/2001   R. Lloyd Kammerer  New code.
+# 11/05/2001   J. Thiessen        Final enhancements and implementation.
+# 02/27/2002   J. Thiessen        Modified to create "job-cards" instead of 
+#                                 executing the jobs directly.
+# 03/19/2002   J. Thiessen        Now uses "0" (zero) to exit or return from 
+#                                 every screen.
+# 07/17/2002   J. Thiessen        Now explicitily translates ${ORACLE_SID} and 
+#                                 DEFAULT when the jobcard is written.  
+# 01/10/2003   J. Thiessen        Added processing to include a prefix to all 
+#                                 output files. Field 5 in the menu*.dat files.
+# 03/10/2003   J. Thiessen        removed explicit path references to allow the 
+#                                 PATH to select the proper version or custom
+#                                 executables. 
+# 09/15/2005   R. Crawford        Replaced /tmp with ${BATCH_TMP} to help 
+#                                 segregate the accounts on the mid-tier structure
+# 03/01/2006   J. Thiessesn       Allow special characters.
+# 08/23/2006   J. Thiessesn       Changed description within jobcards. 
+# 09/14/2006   J. Thiessen        Now requiring End_Of_Parameters in jobcards to
+#                                 indicate the end of parameters.
+# 03/10/2009   J. Thiessen        Changed width of index integer from 4 to 2 
+#                                 because it was being trasnlated as octal.
+#
+#*******************************************************************************
+
+
+
+
+###
+#
+##  Still to be done.
+#
+#
+#  Support insertion of parms mid-command line
+#  Support of required parms
+#  Better Error Checking ( actually any error checking )
+#  Clean up -- kinda cludging in parts
+#  Error reporting / sucess reporting -- ( support for elemet 5 & 6 )
+#  
+#
+#
+
+
+
+####----------------------------------------------------------------------------
+####
+####  The function format_input formats user input according to specified rules.
+####  For integers: $1 must = "i", $2 is the value to be checked, $3 must be 
+####  an integer, the width of the field
+####  To left-pad strings: $1 must = "l", $2 is the value to be checked, $3 must be 
+####  an integer, the width of the field, $4 is the character to pad with (defaults 
+####  to a space) 
+####  To right-pad strings: $1 must = "r", $2 is the value to be checked, $3 must be 
+####  an integer, the width of the field, $4 is the character to pad with (defaults 
+####  to a space) 
+####  To left-pad strings and convert them to uppercase: $1 must = "L", $2 is 
+####  the value to be checked, $3 must be an integer, the width of the field, 
+####  and $4 is the character to pad with (defaults to a space) 
+####  To right-pad strings and convert them to uppercase: $1 must = "R", $2 is 
+####  the value to be checked, $3 must be an integer, the width of the field, 
+####  and $4 is the character to pad with (defaults to a space) 
+####  JPT 20030111
+####  If a width of zero (0) is specified, any width is accepted and no padding
+####  will be used.  
+####
+function format_input {
+####  set -vx
+bad=0
+ret_val=""
+if [ $# -lt 3 ];then
+  echo "ERROR ABORTING parms:-->${*}<--"
+  exit 8
+fi
+t1=${1}
+t2=${2}
+t3=${3}
+t4=${4:- }
+
+if [ ${t3} -eq 0 ];then
+  t3=${#t2}          ## use length of variable with no padding if width is zero.  JPT 20031011 
+fi
+case ${t1} in
+  i)  echo "${t2}" | grep "[^0-9]" > /dev/null 2>&1
+      if [ $? -eq 0 ];then
+        bad=1
+        t0=FORMAT_INPUT_ERROR
+        ret_val=FORMAT_INPUT_ERROR
+      else
+        jnk=`echo "DEBUG t1=$t1 t2=$t2 t3=$t3 "`
+        ret_val=${t2}
+        typeset -Z${t3} t0
+        t0=${t2}
+      fi ;;
+  L)  tmp=`echo ${t2} | tr "a-z" "A-Z"`
+      t2=${tmp}
+      if [ ${#t2} -ge ${t3} ];then
+        t0=`echo ${t2} | cut -c1-${t3}`
+      else
+        while [ ${#t2} -lt ${t3} ]
+        do
+          t2="${t4}${t2}"
+        done
+        t0="${t2}"
+      fi ;;
+  l)  if [ ${#t2} -ge ${t3} ];then
+        t0=`echo ${t2} | cut -c1-${t3}`
+      else
+        while [ ${#t2} -lt ${t3} ]
+        do
+          t2="${t4}${t2}"
+        done
+        t0="${t2}"
+      fi ;;
+  R)  tmp=`echo ${t2} | tr "a-z" "A-Z"`
+      t2=${tmp}
+      if [ ${#t2} -ge ${t3} ];then
+        t0=`echo ${t2} | cut -c1-${t3}`
+      else
+        while [ ${#t2} -lt ${t3} ]
+        do
+          t2="${t2}${t4}"
+        done
+        t0="${t2}"
+      fi ;;
+  r)  if [ ${#t2} -ge ${t3} ];then
+        t0=`echo ${t2} | cut -c1-${t3}`
+      else
+        while [ ${#t2} -lt ${t3} ]
+        do
+          t2="${t2}${t4}"
+        done
+        t0="${t2}"
+      fi ;;
+  *)  :;;
+esac
+
+######  DEBUG    #####  echo "DEBUG RETURN-VALUE=--->${t0}<---"
+ret_val="${t0}"
+echo "${ret_val}"
+####  set -
+
+}  ####  END FUNCTION format_input
+
+
+####----------------------------------------------------------------------------
+####
+####  The function check_input checks for invalid characters in the input string.
+####
+function check_input {
+echo "${*}" | grep "[~^ -]" > /dev/null 2>&1
+if [ ${?} -eq 0 ];then
+  echo "BAD"
+else
+  echo "VALID"
+fi
+}  ####  END FUNCTION check_input
+
+
+####----------------------------------------------------------------------------
+####
+####  The function p_menu_header displays the generic menu header.  
+####
+function p_menu_header
+{
+  now_dtm=`date`
+  ##  menudatafile="${1}"
+  cat ${MENUSYS_ETC}/${menudatafile} | 
+  clear
+  echo " ${RVON}#${menu_nest_level:-0}################################################################`format_input l ${ORACLE_SID} 10` #${RVOF} "
+  #### DEBUG  grep "^\#menuline2=" ${MENUSYS_ETC}/${menudatafile}      ##  DEBUG 
+  ######  DEBUG    #####  echo "${?} on ---> grep ""^\#menuline2="" ${MENUSYS_ETC}/${menudatafile}  "     ##  DEBUG 
+  menuline2=`grep "^\#menuline2=" ${MENUSYS_ETC}/${menudatafile} ` >> ${BATCH_TMP}/mynull 2>&1   
+  if [ $? -eq 0 ];then 
+    ######  DEBUG    #####  echo "here -->${menuline2}<--"     ##  DEBUG 
+    echo " ${RVON}${menuline2#*=}${RVOF}" 
+  fi
+  menuline3=`grep "^\#menuline3=" ${MENUSYS_ETC}/${menudatafile} ` >> ${BATCH_TMP}/mynull 2>&1  
+  if [ $? -eq 0 ];then echo " ${RVON}${menuline3#*=}${RVOF}" ; fi
+  menuline4=`grep "^\#menuline4=" ${MENUSYS_ETC}/${menudatafile} ` >> ${BATCH_TMP}/mynull 2>&1  
+  if [ $? -eq 0 ];then echo " ${RVON}${menuline4#*=}${RVOF}" ; fi
+  ##  JPT 20050131 AIX  ## menuline5=`grep "^\#menuline5=" ${MENUSYS_ETC}/${menudatafile} ` >> ${BATCH_TMP}/mynull 2>&1  
+  ##  JPT 20050131 AIX  ## if [ $? -eq 0 ];then echo " ${RVON}${menuline5#*=}${RVOF}" ; fi
+  ##  JPT 20050131 AIX  ## menuline6=`grep "^\#menuline6=" ${MENUSYS_ETC}/${menudatafile} ` >> ${BATCH_TMP}/mynull 2>&1  
+  ##  JPT 20050131 AIX  ## if [ $? -eq 0 ];then echo " ${RVON}${menuline6#*=}${RVOF}" ; fi
+  ##  JPT 20050131 AIX  ## menuline7=`grep "^\#menuline7=" ${MENUSYS_ETC}/${menudatafile} ` >> ${BATCH_TMP}/mynull 2>&1  
+  ##  JPT 20050131 AIX  ## if [ $? -eq 0 ];then echo " ${RVON}${menuline7#*=}${RVOF}" ; fi
+  ##  JPT 20050131 AIX  ## menuline8=`grep "^\#menuline8=" ${MENUSYS_ETC}/${menudatafile} ` >> ${BATCH_TMP}/mynull 2>&1  
+  ##  JPT 20050131 AIX  ## if [ $? -eq 0 ];then echo " ${RVON}${menuline8#*=}${RVOF}" ; fi
+  ##  JPT 20050131 AIX  ## menuline9=`grep "^\#menuline9=" ${MENUSYS_ETC}/${menudatafile} ` >> ${BATCH_TMP}/mynull 2>&1  
+  ##  JPT 20050131 AIX  ## if [ $? -eq 0 ];then echo " ${RVON}${menuline9#*=}${RVOF}" ; fi
+  ## HERE HERE HERE  include menu headers in menu.dat files...
+  ####  NEED TO PROPERLY HANDLE SPACES IN THE MENU HEADER 
+
+  ##  JPT 20050131 AIX  ## used_space=`df -k ${BATCH_BIN} |sed  's/  */ /g' |grep "% allocation used" |cut -d" " -f2`
+  ##  RLC 20081202 Linux moved from -f4 to -f5
+  used_space=`df -k . |tail -1 |sed  's/  */ /g' |cut -d" " -f5`
+  echo " ${RVON}########`format_input l ${used_space} 4` Used ############################# ${now_dtm} #${RVOF} "
+}
+
+####----------------------------------------------------------------------------
+####
+####  The function f_schedule_cmd  will query the user for the time at which to 
+####  execute the process (and parameters) which was selected in the menu.
+####
+function f_schedule_cmd 
+{
+  ### ### ###set -vx
+  sched_year=`date +"%Y"`
+  sched_month=`date +"%m"`
+  sched_day=`date +"%d"`
+  sched_hour=`date +"%H"`
+  sched_minute=`date +"%M"`
+  sched_second=`date +"%S"`
+  right_now=`date`
+  set -A sched_date_val 0 ${sched_year} ${sched_month} ${sched_day} ${sched_hour} ${sched_minute} ${sched_second} ${prefix_output_files}
+  set -A sched_date_desc "NOTUSED" "YEAR  " "MONTH " "DAY   " "HOUR  " "MINUTE" "SECOND" "FILE-PREFIX"
+  set -A sched_date_fieldtype  x i i i i i i r
+  set -A sched_date_fieldwidth 0 4 2 2 2 2 2 0
+  cnt=${#sched_date_desc[@]}
+  my_opt=0
+  my_opt_int=0
+  menu_option=`head -2 ${BATCH_TMP}/${tmp_jobcard} | tail -1 | sed 's/#  //' | sed 's/ /_/g'`  
+  confirm_starttime=1
+  
+  while [ ${confirm_starttime} -ne 0 ]
+  do
+    recycle_loop=0
+    unset modify_parm
+    unset err_string
+    p_menu_header
+    now_dtm=`date +"%Y%m%d%H%M%S"`
+    ### ### echo "   ${RVON}########################################################################${menu_nest_level:-0}#${RVOF}"
+    ### ### echo "   ${RVON}#                                                                      #${menu_nest_level:-0}#${RVOF}"
+    echo "                  ${RVON} S P E C I F Y    S T A R T - T I M E ${RVOF}"
+    echo "${menu_option}"
+    ### ### echo "   ${RVON}#               S P E C I F Y    S T A R T - T I M E                   #${menu_nest_level:-0}#${RVOF}"
+    ### ### echo "   ${RVON}#                                                                      #${menu_nest_level:-0}#${RVOF}"
+    ### ### echo "   ${RVON}########################### ${now_dtm} #############################${menu_nest_level:-0}#${RVOF}"
+    ### ### echo "                       ${cnt}                         `date` \n"
+
+    # display the listing of time parms
+    x=1
+    while ((x < ${cnt}))
+    do
+#added -e option
+      echo -e "\t${x}) ${sched_date_desc[${x}]} \t[ ${sched_date_val[${x}]} ]"
+      x=$(expr ${x} + 1)   ## JT 20081202
+    done
+
+    # prompt for input....the \c keeps the cursor on the output line
+#added -e option
+    echo -e "\n Jobs started at next FPA run AFTER the specified time."
+    echo -e " Start time must be specified in the ${RVON}Central Time Zone${RVOF}. \n"
+    echo -e " Enter the element number to change {99 to SUBMIT JOB / 0 to EXIT} : \c"
+    read my_opt
+#added -e option
+    echo -e "\n"
+
+    my_opt_int=`format_input i "${my_opt}" 2`
+    if [ "${my_opt}" = "" ];then 
+      my_opt_int=-1
+      err_string="\nPlease Make A Selection!"
+      modify_parm=0
+      recycle_loop=1
+    elif [ "${my_opt_int}" = "FORMAT_INPUT_ERROR" ];then 
+      my_opt_int=-1
+      err_string="\nERROR......\n${my_opt} is not a valid choice!!!"
+      recycle_loop=1
+      modify_parm=0
+    elif [ ${my_opt_int} -eq 0 ];then       ## don't update parm if exiting.
+      confirm_starttime=0
+      recycle_loop=1
+      modify_parm=0
+    elif [ ${my_opt_int} -eq 99 ];then       ## don't update parm if executing.
+      confirm_starttime=0
+      recycle_loop=1
+      modify_parm=0
+    elif [[ ( ${my_opt_int} -ge ${cnt} ) || ( ${my_opt_int} -lt 0 ) ]];then   
+      my_opt_int=-1
+      err_string="\nERROR......\n${my_opt} is not a valid choice!!!"
+      recycle_loop=1
+      modify_parm=0
+    else
+      modify_parm=1
+    fi
+
+    ######  DEBUG    #####  echo "DEBUG -- my_opt_int=${my_opt_int}"
+    if [ ${modify_parm} -ne 0 ];then   ##  Only update if we have a valid parm number.  
+      echo "Enter a new value for the ${sched_date_desc[${my_opt_int}]}"
+#added -e option
+      echo -e "\t\tOLD : ${sched_date_val[${my_opt_int}]}"
+      echo -e "\t\tNEW : \c"; read user_input
+      valid_input=`check_input ${user_input}`
+      if [ "${valid_input:-BAD}" = "VALID" ]; then
+        tmp=`format_input ${sched_date_fieldtype[${my_opt_int}]} "${user_input}" ${sched_date_fieldwidth[${my_opt_int}]}`
+        if [ "${tmp:-FORMAT_INPUT_ERROR}" != "FORMAT_INPUT_ERROR" ];then
+          sched_date_val[${my_opt_int}]="${tmp}"
+        else 
+          recycle_loop=1
+          err_string="\nERROR...\n${user_input} is not a valid ${sched_date_desc[${my_opt_int}]} value!!!"
+        fi
+      else
+        err_string="\nERROR...\n${user_input} is not a valid ${sched_date_desc[${my_opt_int}]} value!!!"
+        recycle_loop=1
+      fi
+    fi
+    ####  ####  if [[ ( ${recycle_loop} -ne 0 ) && ( ${my_opt_int} -lt 99 ) ]];then   ##  Display error message if there is an error
+    if [ "${err_string:-NOTSET}" != "NOTSET" ];then   ##  Display error message if there is an error
+      recycle_loop=1
+#added -e option
+      echo -e "\n${err_string:-INVALID characters in input}"
+      echo -e "\nPress [ENTER] to continue..."
+      read ll
+    fi
+
+  done      ## ##  while looop to set / confirm scheduled start time.
+
+  ######  DEBUG    #####  echo " DEBUG DEBUG HERE HERE HERE HERE  my_opt_int=${my_opt_int}"
+  if [ ${my_opt_int} -eq 99 ];then      ## ## if user selected 99 to schedule the job, then create the jobcard.
+    ####  
+    ####  JPT 20030110  Append the prefix for output files to the JOBCARD 
+    ####  
+    echo "#  JOBCARDs may contain the prefix instructions for output files" >> ${BATCH_TMP}/${tmp_jobcard}
+    echo "#  consisting of ""#  PREFIX:"" and the single-word prefix. " >> ${BATCH_TMP}/${tmp_jobcard}
+    echo "#  If no prefix is desired, the word must be NULL   " >> ${BATCH_TMP}/${tmp_jobcard}
+    echo "#  PREFIX:${sched_date_val[7]}" >> ${BATCH_TMP}/${tmp_jobcard}
+
+    # construct the name for this jobcard
+    jobcard_name="RunAfter"
+    x=1     
+    while ((x < 7))  ## JPT 20030225 Do not include the outputfile prefix in the name of the jobcard.
+    do
+      jobcard_name="${jobcard_name}${sched_date_val[${x}]}"
+      x=${x}+1
+    done
+    menu_option=`head -2 ${BATCH_TMP}/${tmp_jobcard} | tail -1 | sed 's/#  //' | sed 's/ /_/g'`  
+    jobcard_name="${jobcard_name}.${menu_option}.${now_dtm}"
+    mv ${BATCH_TMP}/${tmp_jobcard} ${BATCH_JOBCARDS}/${jobcard_name}
+    if [ ! -a ${BATCH_JOBCARDS}/${jobcard_name} ];then
+#added -e option
+      echo -e "\n\nERROR creating the jobcard, job is NOT scheduled. "
+      echo "Please repeat the job scheduling procedure"
+#added -e option
+      echo -e "\nPress [ENTER] to continue..."
+      read ll
+    else
+#added -e option
+      echo -e "\n${menu_option} Successfully scheduled. "
+    fi
+  fi
+ 
+}       ## end of function f_schedule_cmd 
+
+####----------------------------------------------------------------------------
+####
+####  The function f_process_cmd_selection will appropriately schedule or 
+####  execute the process which was selected in the menu.
+####
+function f_process_cmd_selection 
+{
+
+# define local variables
+special_chars=0   ####  JPT 20051115  Variable to indicate the number of LITERAL parameters for the selected menu item
+set -A parm_name  # Array of parameter names (menu.dat syntax is :parameter name!parameter mode!parameter default )
+set -A parm_mode  # Array of parameter modes (menu.dat syntax is :parameter name!parameter mode!parameter default )
+set -A parm_def   # Array of default values for each parameter (menu.dat syntax is :parameter name!parameter mode!parameter default )
+parmlist=""
+typeset -i i=0
+typeset -i cnt=0
+typeset -i z=0
+typeset -i x=0
+exec_line=UNDEFINED
+interactive_job=FALSE
+
+
+
+####  
+####  Get the default output prefix for this command.
+####  JPT  20030110
+####                                            
+prefix_output_files="${cmd_output_prefix[${1}]}"
+
+if [ ${cmd_parms[${1}]} -lt 1 ];then     # if there are no parameters to confirm...
+  exec_line="${cmd_line[${1}]}"
+  parameters_defined=TRUE
+  my_cmd=`echo ${cmd_line[${1}]} | awk '{ print $1 }'`
+  my_cmd_suffix=${my_cmd##*\.}
+else     # if there are parameters, get user approval
+  parm_name[${cnt}]="NOTUSED"   ## ZERO is reserved to cancel this option.
+  parm_mode[${cnt}]="NOTUSED"
+  parm_def[${cnt}]="NOTUSED"
+  cnt=${cnt}+1
+  i=${cmd_parms[${1}]}   # Add the number of standard menu elements to the parm count
+  i=i+6
+  x=7
+  while (( ${x} <= ${i} ))     # parse out the parms and put them in the local arrays
+  do
+    parm=`echo ${menu_line[${1}]} | awk -F: '{ print $O }' O=${x}`
+    parm_name[${cnt}]=`echo ${parm} | awk -F! '{ print $1 }'`
+    parm_mode[${cnt}]=`echo ${parm} | awk -F! '{ print $2 }'`
+    parm_def[${cnt}]=`echo ${parm} | awk -F! '{ print $3 }'`
+    cnt=${cnt}+1
+    x=${x}+1
+    ######  DEBUG    #####  echo "DEBUG  parm=${parm} "     # DEBUG 20051114
+    ######  DEBUG    #####  echo "DEBUG  parm_name=${parm_name} "     # DEBUG 20051114
+    ######  DEBUG    #####  echo "DEBUG  parm_mode=${parm_mode} "     # DEBUG 20051114
+    ######  DEBUG    #####  echo "DEBUG  parm_def=${parm_def} "     # DEBUG 20051114
+  done
+  cnt=${cnt}-1     # undo the last increment of cnt since we have looped through all parameters
+  ######  DEBUG    #####  echo "DEBUG  cnt is ${cnt}  "   # DEBUG   20051114
+ 
+######  DEBUG    #####  set -vx ####  DEBUG JPT 20051114
+  ####
+  ####  Loop to get user approval of parameters
+  ####  
+  while [ "${exec_line:-UNDEFINED}" = "UNDEFINED" ]
+  do
+    go_around_again=0      # 
+    unset err_string
+    clear
+    p_menu_header
+#added -e option
+    echo -e "                  ${RVON} A P P R O V E    P A R A M E T E R S ${RVOF}\n"
+    echo "${cmd_name[${1}]} "
+    ########echo "${cmd_name[${1}]} :\t${cmd_desc[${1}]}"
+    x=1
+    while ((x <=  ${cnt}))   # display the listing of parms and their defaults
+    do
+      if [ "${parm_mode[${x}]}" = "L" ]; then
+        display_line="    ${RVON}${x}${RVOF}) ${parm_name[${x}]} : [ ${parm_def[${x}]} ]" 
+      else
+        display_line="    ${BOLD}${x}${RVOF}) ${parm_name[${x}]} : [ ${parm_def[${x}]} ]" 
+      fi
+      echo "${display_line}"
+      x=${x}+1
+    done
+    echo ""        # prompt for input....the \c keeps the cursor on the output line
+    ####  echo " To change a parameter, enter its number.  Or enter 99 to APPROVE / 100 to EXIT : \c"
+    ####  echo " Select Option : \c"
+#added -e option
+    echo -e " Enter the parameter number to change  {99 to APPROVE / 0 to EXIT} : \c"
+    read it
+    
+    ####  
+    ####  Handle the input from the user
+    ####
+    ######  DEBUG    #####  set -vx     ###   DEBUG 20051114
+    ######  DEBUG    #####  echo "DEBUG  -=- you entered ${it}" 
+    it_int=`format_input i "${it}" 2`
+    ######  DEBUG    #####  echo "DEBUG  -=- whose integer value is ${it_int}"
+    if [ "${it}" = "" ];then            # no selection was made
+      err_string="\nPlease Make A Selection!"
+      go_around_again=1
+    elif [[ "${it_int}" = "FORMAT_INPUT_ERROR"  ]];then    # invalid selection
+      err_string="\nERROR......\n\n${it} is not a valid choice!!!"
+      go_around_again=1
+    elif [ ${it_int} -eq 99 ];then    # user approved the parameters, build exec_line with current parms
+      rm -f ${BATCH_TMP}/menu_parameters$$.txt ${BATCH_TMP}/bang$$.txt          #### Be sure to start with empty and writable files ...
+      touch ${BATCH_TMP}/menu_parameters$$.txt ${BATCH_TMP}/bang$$.txt          #### Be sure to start with empty and writable files ...
+      if [ ! -w ${BATCH_TMP}/menu_parameters$$.txt ]; then 
+#added -e option
+        echo -e "INTERNAL ERROR in temporary parameter file...  Notify FPA Administrator. \nPress [ENTER] to continue...\v"
+        read ll
+        return         #### ERROR -- returning...  
+      fi
+      x=1
+      while (( ${x} <= ${cnt}))
+      do
+        ######  DEBUG    #####  echo "TEST LOOP#  x:${x}  cnt:${cnt} "   ##  DEBUG 20051114
+        ####  JPT  20051115  Handle the LITERAL parameters here...
+        ####  Note that there are some combinations of characters which can break the code at this point...
+        if [ "${parm_mode[${x}]}" = "L" ]; then
+          echo ${parm_def[${x}]} |sed s${ca}\\\$${ca}\\\\\$${ca}g |sed s${ca}\\\"${ca}\\\\\"${ca}g |sed s${ca}\\\`${ca}\\\\\`${ca}g |sed s${ca}\\\ ${ca}\\\\\ ${ca}g > ${BATCH_TMP}/bang$$.txt 
+          literal_parm=`tail -1 ${BATCH_TMP}/bang$$.txt`
+          parmlist="${parmlist}${literal_parm} "
+          display_line="#  LITERAL Menu Parameter ${parm_name[${x}]} ## ${literal_parm} "
+          echo ""
+        else
+          parmlist="${parmlist}${parm_def[${x}]} "
+          display_line="#          Menu Parameter ${parm_name[${x}]} ## ${parm_def[${x}]} "
+        fi
+        echo "${display_line}"  >> ${BATCH_TMP}/menu_parameters$$.txt
+        x=${x}+1
+      done
+      exec_line="${cmd_line[${1}]} ${parmlist}"
+      go_around_again=0      # 
+    elif [ ${it_int} -eq 0 ];then    # user cancelled this function
+      exec_line=CANCELLED
+      err_string="Process Execution Cancelled..."
+      go_around_again=-1      # signal that the user cancelled this action
+    elif [[ ( ${it_int} -gt ${cnt} ) || ( ${it_int} -lt 0 ) ]];then    # invalid selection
+      err_string="\nERROR......\n\n${it} is not a valid choice!!!"
+      go_around_again=1
+    else           # the selection was valid so lets gather the new data
+#added -e option
+      echo -e "\nEnter a new value for the paramter ${parm_name[${it}]}"
+#added -e option
+      echo -e "\n\t\tOLD : ${parm_def[${it}]}"
+#added -e option
+      echo -e "\t\tNEW : \c"; read user_input
+      valid_input=`check_input ${user_input}`
+      if [ "${user_input}" = "" ]; then
+        go_around_again=1
+        err_string="\nERROR......\n\n$must enter a value for paramter ${parm_name[${it}]}"
+      elif [ "${valid_input:-BAD}" = "VALID" ]; then
+        parm_def[${it}]="${user_input}"
+      else
+        go_around_again=1
+        err_string="\nERROR......\n\n${user_input} contains invalid characters!!!"
+      fi
+    fi
+    if [ ${go_around_again} -ne 0 ]; then
+#added -e option
+      echo -e "${err_string}"
+      # pause right before returning to the main menu
+      #
+#added -e option
+      echo -e "\n\nPress [ENTER] to continue...\v"
+      read ll
+    fi
+  done
+fi
+
+
+  ######  DEBUG    #####  echo "DEBUG EXEC_LINE=${exec_line}" ;sleep 2
+
+######  DEBUG    #####  set -vx ####  DEBUG JPT 20051114
+####  
+####  Now we have the exec_line, process it properly.
+####  
+if [ "${exec_line}" != "CANCELLED" ];then
+  my_cmd=`echo ${exec_line} | awk '{ print $1 }'`
+  ####  echo "TEST #  my_cmd ${my_cmd}   parmlist--->${parmlist}<---"
+  my_cmd_suffix=${my_cmd##*\.}
+  ######  DEBUG    #####  echo "DEBUG TEST #  my_cmd_suffix ${my_cmd_suffix}   parmlist--->${parmlist}<---"
+  ######  DEBUG    #####  echo "DEBUG exec_line=${exec_line}";sleep 4
+  if [ "${my_cmd_suffix}" = "INTERACTIVE" ];then
+    interactive=TRUE
+    tmp=`echo ${exec_line} | sed 's/.INTERACTIVE//'`
+    exec_line=${tmp}
+    my_cmd=`echo ${exec_line} | awk '{ print $1 }'`
+    my_cmd_suffix=${my_cmd##*\.}
+    if [ "${my_cmd_suffix}" = "ksh" ];then
+      ksh ${exec_line}
+    elif [ "${my_cmd}" = "set_oracle_sid" ];then
+      ${exec_line}
+    elif [ "${my_cmd}" = "view_batch_window_data" ];then
+      ${exec_line}
+    elif [ "${my_cmd}" = "set_batch_window_days" ];then
+      ${exec_line}
+    elif [ "${my_cmd}" = "set_batch_window_start" ];then
+      ${exec_line}
+    elif [ "${my_cmd}" = "set_batch_window_stop" ];then
+      ${exec_line}
+    else
+      command ${exec_line}
+    fi
+  ######  REMOVED TO HANDLE JOB STREAMS IN THE MENU JPT 20020424 ######  elif [ "${my_cmd_suffix}" = "ksh" ];then
+  else
+    ####
+    ####  now create the tmp jobcard -- it will be renamed when the start date-time is specified.
+    ####
+    ####  set -vx   ####  JPT DEBUG 20051215
+    unique_num=`date +"%Y%m%d%H%M%S"`
+
+    tmp_jobcard="tmp_$$_${unique_num}.jobcard"
+    ##  JPT 20051114  before writing this line, check to see if there are special characters in the exec_line.  if so, we need to handle those characters before writing the line.  
+    if [ ${special_chars} -gt 0 ]; then 
+      :
+    fi
+    echo "${exec_line}" > ${BATCH_TMP}/${tmp_jobcard}     #### HERE HERE This is the line that will be executed when the job is actually run.  
+    echo "#  ${cmd_name[${1}]}"  >> ${BATCH_TMP}/${tmp_jobcard}
+    echo "#  Command with Hidden Parameters    ## ${cmd_line[${1}]}"  >> ${BATCH_TMP}/${tmp_jobcard}
+    ######  DEBUG    #####  echo "DEBUG num params=${#parmlist[@]}<---"
+    ######  DEBUG    #####  echo "DEBUG parmlist=${parmlist[@]}<---"
+    ######  DEBUG    #####  echo "DEBUG parm_def=${#parm_def[@]}<---"
+    if [ ${#parm_def[@]} -eq 0 ]; then
+      echo "#  No Menu Parameters ## "  >> ${BATCH_TMP}/${tmp_jobcard}
+    else
+       cat ${BATCH_TMP}/menu_parameters$$.txt >> ${BATCH_TMP}/${tmp_jobcard}
+#      display_line=""
+#      loopcount=0
+#      while [ ${loopcount} -lt ${#parm_def[@]} ]
+#      do
+#        if [ "${parm_mode[${loopcount}]}" = "L" ]; then
+#          ####   JPT HERE HERE HERE this_parm=`echo ${parm_def[${loopcount}]} |
+#          display_line="#  LITERAL Menu Parameter ${parm_name[${loopcount}]} ## ${parm_def[${loopcount}]} "
+#        else
+#          display_line="#          Menu Parameter ${parm_name[${loopcount}]} ## ${parm_def[${loopcount}]} "
+#        fi
+#        echo "${display_line}"  >> ${BATCH_TMP}/${tmp_jobcard}
+#        loopcount=`expr ${loopcount} + 1`
+#      done
+    fi
+    echo "#  End_Of_Parameters  ## This line required for processing "  >> ${BATCH_TMP}/${tmp_jobcard} # 20060914 JT  Explicitly indicating the end of parameters. Used by FPA_startjob.ksh
+End_Of_Parameters
+    ####  echo "DEBUG  Check the home dir ( /asp/pphst/fpa/home/ppmensut ) and the temp jobcard  ${BATCH_TMP}/${tmp_jobcard} while this statement sleeps for 15 seconds... "    #### JPT DEBUG 20051215 
+    ####  echo "DEBUG  ( this is BEFORE calling f_schedule_cmd ) "    #### JPT DEBUG 20051215 
+    ####  sleep 15     #### JPT DEBUG 20051215 
+    f_schedule_cmd ${tmp_jobcard}
+
+    ####  set -   ####  JPT DEBUG 20051215
+  fi
+  # pause right before heading back to the main menu
+  #
+#added -e option
+  echo -e "\n\nPress [ENTER] to continue...\v"
+  read ll
+fi
+
+}      # end of function f_process_cmd_selection 
+
+####----------------------------------------------------------------------------
+####
+####  The function f_display_menu will read the menu control file and display it.
+####
+function f_display_menu
+{
+  now_dtm=`date +"%Y%m%d%H%M%S"`
+  cmds=0
+  
+  ####  
+  ####  Handle submenus...
+  ####  
+  
+  #### 
+  ####  Define EXIT as option zero
+  #### 
+  if [ ${menu_nest_level:-0} -eq 1 ];then
+    cmd_name[${cmds}]="EXIT"
+    cmd_desc[${cmds}]="Exit Menu System"
+    cmd_line[${cmds}]="exit"
+  else
+    cmd_name[${cmds}]="RETURN"
+    cmd_desc[${cmds}]="Return To Previous Menu"
+    cmd_line[${cmds}]="exit"
+  fi
+  cmd_output_prefix[${cmds}]=0
+  cmd_failure[${cmds}]=1
+  cmd_parms[${cmds}]=0
+#test added -e option
+  echo -e "  0) ${cmd_name[${cmds}]} \t${cmd_desc[${cmds}]}"
+  if [ ${menu_nest_level:-0} -eq 1 ];then
+    #### 
+    ####  Define MONITOR as option one
+    ####  Create daily summary file if it does not already exist.
+    ####
+    if [ ! -a ${BATCH_LOGS}/batch_summary.`date +%Y%m%d` ];then
+      touch ${BATCH_LOGS}/batch_summary.`date +%Y%m%d`
+    fi
+    cmds=cmds+1
+    cmd_name[${cmds}]="MONITOR"
+    cmd_desc[${cmds}]="Monitor Batch Summary (cannot return to this menu)"
+    cmd_prompt[${cmds}]=" MONITORING Batch Summary Messages...\v  (type CONTROL-C to exit) "
+    cmd_line[${cmds}]="tail.INTERACTIVE -16f ${BATCH_LOGS}/batch_summary.`date +%Y%m%d`"
+    cmd_output_prefix[${cmds}]=0
+    cmd_failure[${cmds}]=1
+    cmd_parms[${cmds}]=0
+#added -e option
+    echo -e "  1) ${cmd_name[${cmds}]} \t${cmd_desc[${cmds}]}"
+  fi
+
+  # Parse and input the menu data file
+  cat ${MENUSYS_ETC}/${menudatafile} | 
+  while read line
+  do
+    #
+    #  Ensure that we do not read any comments or commented out tasks
+    if [ "`echo ${line} | awk -F: '{print substr($1,1,1)}'`" != "#" ]
+    then
+      cmds=cmds+1
+      if [ ${cmds} -lt 10 ];then
+        spacer=" "
+      else
+        spacer=""
+      fi
+      cmd_name[${cmds}]=`echo ${line} | awk -F: '{print $1}'` 
+      cmd_desc[${cmds}]=`echo ${line} | awk -F: '{print $2}'` 
+      cmd_prompt[${cmds}]=`echo ${line} | awk -F: '{print $3}'` 
+      #  cmd_line[${cmds}]=`echo ${line} | awk -F: '{print $4}'` 
+      cmd_line[${cmds}]=`echo ${line} | awk -F: '{print $4}' | sed s/\$\{ORACLE_SID}/${ORACLE_SID}/g | sed s/DEFAULT/${ORACLE_SID}/g` 
+      cmd_output_prefix[${cmds}]=`echo ${line} | awk -F: '{print $5}'` 
+      cmd_failure[${cmds}]=`echo ${line} | awk -F: '{print $6}'` 
+      cmd_parms[${cmds}]=`echo ${line} | awk -F: '{print NF-6}'` 
+      menu_line[${cmds}]=${line}
+#added -e option
+      echo -e " ${spacer}${cmds}) ${cmd_name[${cmds}]} \t${cmd_desc[${cmds}]}"
+    fi
+  done
+}
+
+
+##########################################################################
+#   main script                                                          #
+##########################################################################
+
+####  
+####  NOTE:  must explicitly source the desired .profile to define the 
+####  environment variables properly since this script is being executed
+####  in place of a shell for a captive user.  The profile that will be 
+####  used is .<username>.menu.profile (in the account's home 
+####  directory) the directory path must be hardcoded in this script 
+####  because no environment variables are available at this point in 
+####  the login process.  
+####  
+####  
+#########################  . /asp/nmhst/fpa/home/nmmensut/.nmmensut.menu.profile ### 20051114 JPT JPT DEBUG TESTING...
+my_home=`grep "^${LOGIN}:" /etc/passwd |cut -d: -f6 |sed 's:\/\.\/$::'|sed 's:\/$::'`
+if [ -r ${my_home}/.${LOGIN}.menu.profile ]; then     ### 20051114 JPT CHangeed from LOGNAME to LOGIN to work better with sudo
+  . ${my_home}/.${LOGIN}.menu.profile     ### 20051114 JPT CHangeed from LOGNAME to LOGIN to work better with sudo
+else
+  echo "ERROR -- the menu profile for ${LOGIN} does not exist."     ### 20051114 JPT CHangeed from LOGNAME to LOGIN to work better with sudo
+  exit 2
+fi
+. batchlog.ksh                    #  DEFINE SOME VARIABLES, BUT DON'T CALL BATCHSTART...
+. ksh_functions.ksh               #  READS THE DATE AND RUN_SEQUENCE FUNCTIONS
+export MENU_RUNNING=TRUE          #  PREVENTS RE-RUNNING .profile WHEN STARTING A SUBMENU
+
+#added -e option
+ca=`echo -e '\001'`  ####  JPT 20051115  Added the ca variable to contain the control-a character for use in sed commands.
+
+menudatafile="${MENUSYS_DEFAULTMENU:-menu.dat}"   # Allows Different menus to run in the same environment
+num_params=${#*}
+if [ ${num_params} -gt 0 ];then
+  menudatafile="${1}"
+fi
+
+####  
+####  Track level of NESTING for the menus
+####  
+if [ ${menu_nest_level:-0} = "0" ];then
+  export menu_nest_level=1
+else
+  export menu_nest_level=`expr ${menu_nest_level} + 1`
+fi
+
+#
+#  Setup the global variables
+#
+set -A cmd_name
+set -A cmd_descrption
+set -A cmd_output_prefix
+set -A cmd_failure
+set -A cmd_line
+set -A cmd_prompt
+set -A cmd_parms
+set -A menu_line
+typeset -i t=1
+typeset -i cmds=0
+
+
+# 
+# begin program execution with an infinite loop
+#
+x=0
+while (( ${x} < 900 ))
+do
+  clear
+  unset err_msg
+  p_menu_header
+  ############  echo " Select the number of the job you wish to run:"
+  echo 
+  f_display_menu
+ 
+  echo ""
+#added -e option
+  echo -e " Selection: \c"; read it 
+#added -e option
+  echo -e "\n"
+    it_int=`format_input i "${it}" 2`
+
+  if [ "${it}" = "" ];then 
+    err_msg="Please Make A Selection!"
+  elif [[ "${it_int}" = "FORMAT_INPUT_ERROR"  ]];then    # invalid selection
+    err_msg="\nERROR......\n\n${it} is not a valid choice!!!"
+  elif [ ${it_int} -eq 0 ];then
+    x=999       # exit the menu loop
+  elif [[ ( ${it_int} -gt ${cmds} ) || ( ${it_int} -lt 0 ) ]];then    # invalid selection
+    err_msg="\nERROR......\n\n${it} is not a valid choice!!!"
+  else
+    f_process_cmd_selection ${it_int}
+  fi
+  if [ "${err_msg:-NOTSET}" != "NOTSET" ]; then
+#added -e option
+    echo -e "${err_msg}"
+#added -e option
+    echo -e "\nPress [ENTER] to continue..."
+    read ll
+  fi
+done;
+
+####  
+####  Decrement level of NESTING for the menus,
+####  UNSET menu_nest_level if exiting the menu...
+####  
+if [ ${menu_nest_level:-0} -le 1 ];then
+  unset menu_nest_level
+else
+  export menu_nest_level=`expr ${menu_nest_level} - 1`
+fi
+

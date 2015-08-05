@@ -1,0 +1,115 @@
+:
+#
+# $Header: oraenv.sh.pp 19-jul-2001.14:02:07 jboyce Exp $ oraenv.sh.pp Copyr (c) 1991 Oracle
+#
+###################################
+# 
+# usage: . oraenv
+#
+# This routine is used to condition a user's environment for access to
+# an ORACLE database. It will prompt for the value of the new SID unless
+# the variable ORAENV_ASK is set to NO, in which case it will use the
+# current value of ORACLE_SID.
+# The character "*" denotes a null SID.
+#
+# NOTE:		Due to constraints of the shell in regard to environment
+# -----		variables, the command MUST be prefaced with ".". If it
+#		is not, then no permanent change in the user's environment
+#		can take place.
+#
+#####################################
+
+case ${ORACLE_TRACE:-""} in
+    T)  set -x ;;
+esac
+
+#
+# Determine how to suppress newline with echo command.
+#
+N=
+C=
+if echo "\c" | grep c >/dev/null 2>&1; then
+    N='-n'
+else
+    C='\c'
+fi
+
+#
+# Set minimum environment variables
+#
+
+# ensure that OLDHOME is non-null
+if [ ${ORACLE_HOME:-0} = 0 ]; then
+    OLDHOME=$PATH
+else
+    OLDHOME=$ORACLE_HOME
+fi
+
+case ${ORAENV_ASK:-""} in                       #ORAENV_ASK suppresses prompt when set
+
+    NO)	NEWSID="$ORACLE_SID" ;;
+    *)	case "$ORACLE_SID" in
+	    "")	ORASID=$LOGNAME ;;
+	    *)	ORASID=$ORACLE_SID ;;
+	esac
+	echo $N "ORACLE_SID = [$ORASID] ? $C"
+	read NEWSID
+	case "$NEWSID" in
+	    "")		ORACLE_SID="$ORASID" ;;
+	    *)	        ORACLE_SID="$NEWSID" ;;		
+	esac ;;
+esac
+export ORACLE_SID
+
+###  JPT 20050131  ###  ORAHOME=`dbhome "$ORACLE_SID"`
+###  JPT 20050131  ###  case $? in
+    ###  JPT 20050131  ###  0)	ORACLE_HOME=$ORAHOME ;;
+    ###  JPT 20050131  ###  *)	echo $N "ORACLE_HOME = [$ORAHOME] ? $C"
+	###  JPT 20050131  ###  read NEWHOME
+	###  JPT 20050131  ###  case "$NEWHOME" in
+	    ###  JPT 20050131  ###  "")	ORACLE_HOME=$ORAHOME ;;
+	    ###  JPT 20050131  ###  *)	ORACLE_HOME=$NEWHOME ;;
+	###  JPT 20050131  ###  esac ;;
+###  JPT 20050131  ###  esac
+###  JPT 20050131  ###  
+###  JPT 20050131  ###  export ORACLE_HOME 
+
+#
+# Put new ORACLE_HOME in path and remove old one
+#
+
+case "$OLDHOME" in
+    "")	OLDHOME=$PATH ;;	#This makes it so that null OLDHOME can't match
+esac				#anything in next case statement
+
+case "$PATH" in
+    *$OLDHOME/bin*)	PATH=`echo $PATH | \
+			    sed "s;$OLDHOME/bin;$ORACLE_HOME/bin;g"` ;;
+    *$ORACLE_HOME/bin*)	;;
+    *:)			PATH=${PATH}$ORACLE_HOME/bin: ;;
+    "")			PATH=$ORACLE_HOME/bin ;;
+    *)			PATH=$PATH:$ORACLE_HOME/bin ;;
+esac
+
+export PATH 
+
+#
+# Install any "custom" code here
+#
+
+###  JPT 20050131  ###  # Locate "osh" and exec it if found
+###  JPT 20050131  ###  ULIMIT=`LANG=C ulimit 2>/dev/null`
+###  JPT 20050131  ###  if [ $? = 0 -a "$ULIMIT" != "unlimited" ] ; then
+  ###  JPT 20050131  ###  if [ "$ULIMIT" -lt 2113674 ] ; then
+    ###  JPT 20050131  ###  if [ -f $ORACLE_HOME/bin/osh ] ; then
+	###  JPT 20050131  ###  exec $ORACLE_HOME/bin/osh
+    ###  JPT 20050131  ###  else
+	###  JPT 20050131  ###  for D in `echo $PATH | tr : " "`
+	###  JPT 20050131  ###  do
+	    ###  JPT 20050131  ###  if [ -f $D/osh ] ; then
+		###  JPT 20050131  ###  exec $D/osh
+	    ###  JPT 20050131  ###  fi
+	###  JPT 20050131  ###  done
+    ###  JPT 20050131  ###  fi
+  ###  JPT 20050131  ###  fi
+###  JPT 20050131  ###  fi

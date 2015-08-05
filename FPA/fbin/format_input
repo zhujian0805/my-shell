@@ -1,0 +1,99 @@
+####----------------------------------------------------------------------------
+####
+####  The function format_input formats user input according to specified rules.
+####  For integers: $1 must = "i", $2 is the value to be checked, $3 must be 
+####  an integer, the width of the field
+####  To left-pad strings: $1 must = "l", $2 is the value to be checked, $3 must be 
+####  an integer, the width of the field, $4 is the character to pad with (defaults 
+####  to a space) 
+####  To right-pad strings: $1 must = "r", $2 is the value to be checked, $3 must be 
+####  an integer, the width of the field, $4 is the character to pad with (defaults 
+####  to a space) 
+####  To left-pad strings and convert them to uppercase: $1 must = "L", $2 is 
+####  the value to be checked, $3 must be an integer, the width of the field, 
+####  and $4 is the character to pad with (defaults to a space) 
+####  To right-pad strings and convert them to uppercase: $1 must = "R", $2 is 
+####  the value to be checked, $3 must be an integer, the width of the field, 
+####  and $4 is the character to pad with (defaults to a space) 
+####  JPT 20030111
+####  If a width of zero (0) is specified, any width is accepted and no padding
+####  will be used.  
+####
+function format_input {
+####  set -vx
+bad=0
+ret_val=""
+if [ $# -lt 3 ];then
+  echo "ERROR ABORTING parms:-->${*}<--"
+  exit 8
+fi
+t1=${1}
+t2=${2}
+t3=${3}
+t4=${4:- }
+
+if [ ${t3} -eq 0 ];then
+  t3=${#t2}          ## use length of variable with no padding if width is zero.  JPT 20031011 
+fi
+case ${t1} in
+  i)  echo "${t2}" | grep "[^0-9]" > /dev/null 2>&1
+      if [ $? -eq 0 ];then
+        bad=1
+        t0=FORMAT_INPUT_ERROR
+        ret_val=FORMAT_INPUT_ERROR
+      else
+	jnk=`echo "DEBUG t1=$t1 t2=$t2 t3=$t3 "`
+        ret_val=${t2}
+        typeset -Z${t3} t0
+	t0=${t2}
+      fi ;;
+  L)  tmp=`echo ${t2} | tr "a-z" "A-Z"`
+      t2=${tmp}
+      if [ ${#t2} -ge ${t3} ];then
+	t0=`echo ${t2} | cut -c1-${t3}`
+      else
+	while [ ${#t2} -lt ${t3} ]
+	do
+	  t2="${t4}${t2}"
+	done
+	t0="${t2}"
+      fi ;;
+  l)  if [ ${#t2} -ge ${t3} ];then
+	t0=`echo ${t2} | cut -c1-${t3}`
+      else
+	while [ ${#t2} -lt ${t3} ]
+	do
+	  t2="${t4}${t2}"
+	done
+	t0="${t2}"
+      fi ;;
+  R)  tmp=`echo ${t2} | tr "a-z" "A-Z"`
+      t2=${tmp}
+      if [ ${#t2} -ge ${t3} ];then
+	t0=`echo ${t2} | cut -c1-${t3}`
+      else
+	while [ ${#t2} -lt ${t3} ]
+	do
+	  t2="${t2}${t4}"
+	done
+	t0="${t2}"
+      fi ;;
+  r)  if [ ${#t2} -ge ${t3} ];then
+	t0=`echo ${t2} | cut -c1-${t3}`
+      else
+	while [ ${#t2} -lt ${t3} ]
+	do
+	  t2="${t2}${t4}"
+	done
+	t0="${t2}"
+      fi ;;
+  *)  :;;
+esac
+
+# echo "DEBUG RETURN-VALUE=--->${t0}<---"
+ret_val="${t0}"
+echo "${ret_val}"
+####  set -
+
+}  ####  END FUNCTION format_input
+

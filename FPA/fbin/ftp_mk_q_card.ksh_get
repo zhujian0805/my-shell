@@ -1,0 +1,261 @@
+#!/bin/ksh
+#--------------------------- COPYRIGHT NOTICE ----------------------------------
+#*******************************************************************************
+#
+# Copyright (c) 2004 Perot Systems Corporation 
+# All Rights Reserved
+# Copyright Notice Does Not Imply Publication
+#
+#*******************************************************************************
+#
+#  NAME:               ftp_mk_q_card.ksh  
+#                      Creates a specific ftp_q_card 
+#
+#  DESCRIPTION:        This program create an ftp_q_card.  The input 
+#                      information required for the q_card is:
+#                      1)  destination hostname. 
+#                      2)  sequence information - either ready, pending, manual. 
+#                      3)  the mode of transfer, ascii, binary, etc.
+#                      4)  the fullpath name of the source file to be sent.
+#                      5)  the full name to call the file on the destination server.
+#                      6)  name of flagfile(s) to craete upon successful completion.
+#                      7)  other commands.
+#                      
+#                      DESTINATION HOSTNAME - provided as the first 
+#                        parameter, this name must match a configuration file 
+#                        named ${BATCH_ETC}/ftp.<destination>.dat which contains 
+#                        ip address information, connection information, etc.
+#                      SEQUENCE INFORMATION - must be 'ready' at this 
+#                        time.  The pending logic will be released shortly and 
+#                        will allow sequencing ftp files. 
+#                      TRANSFER MODE - either 'ascii' or 'binary' 
+#                      SOURCE FILENAME - The filename including its 
+#                        absolute path.  The code will validate that the file 
+#                        being sent resides in a directory which has been 
+#                        approved for sending data offsite. 
+#                      DESTINATION FILENAME - The full name of the 
+#                        file on the destination server including the path -- 
+#                        this path must match the access of the ftp login 
+#                        which may or may not be the absolute path.  
+#                      FLAG FILE(S) - the pipe delimited list of files to 
+#                        create in $BATCH_FLAGS as triggers for other 
+#                        processes. No spaces allowed. 
+#                      OTHER COMMANDS - eg SITE commands to set CYLINDERS for 
+#                        a transfer to a mainframe. 
+#                     
+#                       
+#                      Each ftp_q_card is named according to the 
+#                      following template:  <dest>.q<seq#>.<source_filename> 
+#                      where <dest> is the destination hostname, seq# is a 
+#                      sequential number for the specified destination, and 
+#                      source_filename is the basename of the file to be sent.
+#--# #                       
+#--# #
+#--# #  EXT DATA FILES:     BATCH_ETC/fpt.<destination>.dat - the file containing 
+#--# #                      the connection, login, validation, parameters, and 
+#--# #                      disconnection information for the specified destination.  
+#--# #                      This file must be manually created for each destination
+#--# #                      and must be a korn shell executable. 
+#--# #                      
+#--# #
+#--# #  ENV VARIABLES:      Many environment variables are defined in 
+#--# #                          $BATCH_ETC/ftp.<destination>.dat
+#--# #                      
+#--# #  INPUT:              ftp_deliver.ksh requires one command line argument 
+#--# #                          indicating the name of the FTP destination.  
+#--# #
+#--# #  OUTPUT:             standard log file
+#--# #                      <ftp_dest>.<seq#>.scheduled - this file contains the 
+#--# #                          list of ftp_q_cards that were scheduled to be 
+#--# #                          processed during this run.  
+#--# #                      <ftp_dest>.<seq#>.not_scheduled - this file contains 
+#--# #                          the list of ftp_q_cards that FAILED to be 
+#--# #                          scheduled to be processed during this run.  
+#--# #                      <ftp_dest>.<seq#>.errors - this file contains the 
+#--# #                          list of ftp_q_cards that were successfully 
+#--# #                          scheduled to be processed during this run, but 
+#--# #                          had errors during the run.  
+#--# #                      <ftp_dest>.<seq#>.status - this file contains a 
+#--# #                          summary status of the actions performed during 
+#--# #                          this run. 
+#--# #
+#  TEMPORARY FILES:    
+#
+#  EXT FUNC CALLS:     Standard batch messaging functions in batchlog.ksh and
+#                          ksh_functions.ksh
+#
+#  EXT MOD CALLS:      Standard tools: batchlog.ksh, ksh_functions.ksh
+#
+#*******************************************************************************
+# Date         Programmmer      Description
+# ----------   --------------   ------------------------------------------
+# 02/12/2004   J Thiessen       New Code.
+#
+# 04/20/2005   R. Crawford      Consoldidation of log files to one per day.
+#                               Modified setlog command
+#*******************************************************************************
+
+##########################################################################
+#   main script                                                          #
+##########################################################################
+. ~/.FPAprofile     
+. batchlog.ksh
+NO_SUMMARY_MSGS=TRUE 
+APPEND_LOG_FILE=TRUE    ## Do not export
+batch_prg="${batch_prg}.${1:-UNDEFINED}"  ## include the destination in the log file name.  
+setlog ${batch_prg}.`date +'%Y%m%d'`
+batchstart
+my_dhm=${fpa_run_dhm:-${batch_run_dhm}}
+
+badlist=${batch_prg}.badlist.${batch_start_dtm}
+
+####
+####
+if [ $# -lt 5 ]; then
+  msg="Usage:  'ftp_mk_q_card.ksh <destination> <status> <mode> <full_path_source_filename> <full_destination_filename> [flagfile] [other_commands] ' parameters in square braces are optional. "
+  batcherror "${msg} "
+fi
+
+####
+####  Validate the destination. 
+####
+ftp_dest=${1:-}
+ftp_ini_file="${BATCH_ETC}/ftp.${ftp_dest}.dat"                    ## Used by many functions 
+if [ -r ${ftp_ini_file} ]; then
+  . ${ftp_ini_file}           ##  
+else
+  msg="ERROR:  '${ftp_dest}' is not a configured FTP destination. " 
+  batcherror "${msg} "
+fi
+if [ $# -gt 0 ]; then shift; fi   # shift away the argument that has been validated and stored. 
+
+####
+####  Validate status. 
+####
+ftp_status=`echo "${1%%/*}" | tr [A-Z] [a-z] `
+ftp_delayed=`echo "${1##*/}" | grep "^[0-9]\{1,\}$"`   
+case "${ftp_status}" in
+  (ready)     ftp_q_card_dir=${BATCH_FTP_QUEUE}/ready ;;
+  (pending)   ftp_q_card_dir=${BATCH_FTP_QUEUE}/pending ;;
+  (manual)    ftp_q_card_dir=${BATCH_FTP_QUEUE}/manual  ;;
+  (*)         msg="ERROR - ${batch_prg} unknown status: ${ftp_status} "
+              batcherror_notify "${msg}" ;;
+esac
+if [ $# -gt 0 ]; then shift; fi   # shift away the argument that has been validated and stored. 
+
+####
+####  Determine direction, get or put.  
+####
+ftp_direction=`echo "${1:-}" | tr [A-Z] [a-z] `
+ftp_mode=${ftp_direction##*_}
+if [ ${#ftp_direction} = ${#ftp_mode} ]; then
+  ftp_direction=put
+else
+  ftp_direction=${ftp_direction%_*}
+fi
+####
+####  Validate transfer mode. 
+####
+case "${ftp_mode}" in
+  (ascii)     : ;;
+  (binary)    : ;;
+  (*)         msg="ERROR - ${batch_prg} unknown transfer mode: ${ftp_mode} "
+              batcherror_notify "${msg}" ;;
+esac
+if [ $# -gt 0 ]; then shift; fi   # shift away the argument that has been validated and stored. 
+
+####
+####  Validate source file. 
+####
+ftp_source_file="${1:-}"                    
+if [ ! -r ${ftp_source_file} ]; then
+  msg="ERROR:  Cannot read source file '${ftp_source_file}' . " 
+  batcherror "${msg} "
+fi
+ftp_ls_info=`ls -l ${ftp_source_file} `
+##  ftp_file_size=`ls -l ${ftp_source_file} |awk '{ print $5 }'`
+ftp_file_size=`echo ${ftp_ls_info} |awk '{ print $5 }'`
+let "ftp_file_size_k = ftp_file_size / 1024"
+let "ftp_xfer_duration = ftp_file_size_k / ftp_xfer_rate"
+if [ $# -gt 0 ]; then shift; fi   # shift away the argument that has been validated and stored. 
+
+####
+####  Destination file -- no validation here. 
+####
+ftp_dest_file="${1:-}"                    
+if [ $# -gt 0 ]; then shift; fi   # shift away the argument that has been validated and stored. 
+
+####
+####  Flag File -- no validation here. 
+####
+ftp_flag_file="${1:-}"                    
+if [ "${ftp_flag_file}" = "NOFLAG" ]; then
+  ftp_flag_file=""
+fi
+if [ $# -gt 0 ]; then shift; fi   # shift away the argument that has been validated and stored. 
+
+####  
+####  Process the other commands in sequence.
+####  
+
+
+####
+####  Create the ftp_q_card
+####
+ftp_seq_num=`get_run_seq ${ftp_dest}.filenum.seq`
+ftp_q_card_name="${ftp_q_card_dir}/${ftp_dest}.r${my_dhm:-000000}.q${ftp_seq_num}.`basename ${ftp_source_file}`"
+tmp_ftp_q_card_name="${BATCH_TMP}/${ftp_dest}.r${my_dhm:-000000}.q${ftp_seq_num}.`basename ${ftp_source_file}`"
+messagelog "Creating ftp_q_card ${tmp_ftp_q_card_name} "
+if [ -a ${tmp_ftp_q_card_name} ]; then 
+  msg="ERROR - Cannot overwrite the ftp q card ${tmp_ftp_q_card_name} "
+  batcherror_notify "${msg}" 
+fi
+echo "##- Mode        -## ${ftp_mode} " >> ${tmp_ftp_q_card_name}
+if [ "${?}" -ne 0 ]; then 
+  msg="ERROR - problem writing to ${tmp_ftp_q_card_name}"
+  mv ${tmp_ftp_q_card_name} ${BATCH_FTP_QUEUE}/errors/`basename ${tmp_ftp_q_card_name}`.PARTIAL
+  batcherror_notify "ERROR - problem writing to ${msg}"
+fi
+echo "##- Direction   -## ${ftp_direction} " >> ${tmp_ftp_q_card_name}
+if [ "${?}" -ne 0 ]; then batcherror_notify "ERROR - problem writing to ${tmp_ftp_q_card_name}"; fi
+echo "##- Dest File   -## ${ftp_dest_file} " >> ${tmp_ftp_q_card_name}
+if [ "${?}" -ne 0 ]; then batcherror_notify "ERROR - problem writing to ${tmp_ftp_q_card_name}"; fi
+echo "##- Source File -## ${ftp_source_file} " >> ${tmp_ftp_q_card_name}
+if [ "${?}" -ne 0 ]; then batcherror_notify "ERROR - problem writing to ${tmp_ftp_q_card_name}"; fi
+echo "##- File Size   -## ${ftp_file_size:-Unknown} " >> ${tmp_ftp_q_card_name}
+if [ "${?}" -ne 0 ]; then batcherror_notify "ERROR - problem writing to ${tmp_ftp_q_card_name}"; fi
+
+####
+####  Process the site commands.  
+####
+while [ ${#@} -gt 0 ]
+do
+  unset my_cmd  ##  be explicit 
+  my_cmd=${1}
+  ## my_cmd=${1%%=*}
+  ## my_cmd_value=${1##*=}
+  
+  echo "##- Command     -##   ${my_cmd:+site} ${my_cmd:-Unknown} " >> ${tmp_ftp_q_card_name}
+  ### ## ### ##  grep "^##- ${my_cmd} *-## " ${ftp_ini_file} | sed "s/ ${my_cmd} / Command /g" >> ${tmp_ftp_q_card_name}
+  if [ "${?}" -ne 0 ]; then batcherror_notify "ERROR - problem writing to ${tmp_ftp_q_card_name}"; fi
+
+  shift   # Discard the parameter that was just processed. 
+done
+
+echo "##- Information -## ls -l: ${ftp_ls_info:-Unknown} " >> ${tmp_ftp_q_card_name}
+if [ "${?}" -ne 0 ]; then batcherror_notify "ERROR - problem writing to ${tmp_ftp_q_card_name}"; fi
+echo "##- Duration    -## ${ftp_xfer_duration:-Unknown} " >> ${tmp_ftp_q_card_name}
+if [ "${?}" -ne 0 ]; then batcherror_notify "ERROR - problem writing to ${tmp_ftp_q_card_name}"; fi
+echo "##- Flag File   -## ${ftp_flag_file:-} " >> ${tmp_ftp_q_card_name}
+if [ "${?}" -ne 0 ]; then batcherror_notify "ERROR - problem writing to ${tmp_ftp_q_card_name}"; fi
+echo "##- Warn Delay  -## ${ftp_delayed:-} " >> ${tmp_ftp_q_card_name}
+if [ "${?}" -ne 0 ]; then batcherror_notify "ERROR - problem writing to ${tmp_ftp_q_card_name}"; fi
+## ##  echo "##- Alarm Delay -## ${ftp_file_size:-Unknown} " >> ${tmp_ftp_q_card_name}
+## ##  if [ "${?}" -ne 0 ]; then batcherror_notify "ERROR - problem writing to ${tmp_ftp_q_card_name}"; fi
+
+####  
+####  Remove all blank lines.
+####  
+cat ${tmp_ftp_q_card_name} | sed 's/ *$//' | sed '/^$/d' > ${ftp_q_card_name}
+
+batchend

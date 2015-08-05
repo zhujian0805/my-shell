@@ -1,0 +1,511 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" dir="ltr" lang="en"><head>
+<meta name="google-site-verification" content="kVBb0yua7LXXzgm8Y79AlF_gp5APQfNyn3RFotKtCQo">
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta http-equiv="Content-Style-Type" content="text/css">
+		<meta name="generator" content="MediaWiki 1.15.1">
+		<meta name="keywords" content="NetBackup,Tcp wrappers">
+		<link rel="shortcut icon" href="http://editthis.info/favicon.ico">
+		<link rel="search" type="application/opensearchdescription+xml" href="http://editthis.info/joe_noone/opensearch_desc.php" title="Joe Noone (en)">
+		<link rel="alternate" type="application/rss+xml" title="Joe Noone RSS Feed" href="http://editthis.info/joe_noone/?title=Special:RecentChanges&amp;feed=rss">
+		<link rel="alternate" type="application/atom+xml" title="Joe Noone Atom Feed" href="http://editthis.info/joe_noone/?title=Special:RecentChanges&amp;feed=atom">
+		<title>NetBackup - Joe Noone</title>
+		<link rel="stylesheet" href="NetBackup%20-%20Joe%20Noone_files/shared.css" type="text/css" media="screen">
+		<link rel="stylesheet" href="NetBackup%20-%20Joe%20Noone_files/commonPrint.css" type="text/css" media="print">
+		<link rel="stylesheet" href="NetBackup%20-%20Joe%20Noone_files/main.css" type="text/css" media="screen">
+		<!--[if lt IE 5.5000]><link rel="stylesheet" href="/skins/monobook/IE50Fixes.css?207" type="text/css" media="screen" /><![endif]-->
+		<!--[if IE 5.5000]><link rel="stylesheet" href="/skins/monobook/IE55Fixes.css?207" type="text/css" media="screen" /><![endif]-->
+		<!--[if IE 6]><link rel="stylesheet" href="/skins/monobook/IE60Fixes.css?207" type="text/css" media="screen" /><![endif]-->
+		<!--[if IE 7]><link rel="stylesheet" href="/skins/monobook/IE70Fixes.css?207" type="text/css" media="screen" /><![endif]-->
+		<link rel="stylesheet" href="NetBackup%20-%20Joe%20Noone_files/a_004.html" type="text/css">
+		<link rel="stylesheet" href="NetBackup%20-%20Joe%20Noone_files/a_005.html" type="text/css" media="print">
+		<link rel="stylesheet" href="NetBackup%20-%20Joe%20Noone_files/a_003.html" type="text/css">
+		<link rel="stylesheet" href="NetBackup%20-%20Joe%20Noone_files/a_002.html" type="text/css">
+		<!--[if lt IE 7]><script type="text/javascript" src="/skins/common/IEFixes.js?207"></script>
+		<meta http-equiv="imagetoolbar" content="no" /><![endif]-->
+
+		<script type="text/javascript">/*<![CDATA[*/
+		var skin = "monobook";
+		var stylepath = "/skins";
+		var wgArticlePath = "/joe_noone/$1";
+		var wgScriptPath = "/joe_noone";
+		var wgScript = "/joe_noone/";
+		var wgVariantArticlePath = false;
+		var wgActionPaths = {};
+		var wgServer = "http://editthis.info";
+		var wgCanonicalNamespace = "";
+		var wgCanonicalSpecialPageName = false;
+		var wgNamespaceNumber = 0;
+		var wgPageName = "NetBackup";
+		var wgTitle = "NetBackup";
+		var wgAction = "view";
+		var wgArticleId = "1316";
+		var wgIsArticle = true;
+		var wgUserName = null;
+		var wgUserGroups = null;
+		var wgUserLanguage = "en";
+		var wgContentLanguage = "en";
+		var wgBreakFrames = false;
+		var wgCurRevisionId = 1436;
+		var wgVersion = "1.15.1";
+		var wgEnableAPI = true;
+		var wgEnableWriteAPI = true;
+		var wgSeparatorTransformTable = ["", ""];
+		var wgDigitTransformTable = ["", ""];
+		var wgRestrictionEdit = [];
+		var wgRestrictionMove = [];
+		/*]]>*/</script>
+	        <script type="text/javascript" src="NetBackup%20-%20Joe%20Noone_files/jquery-1.js"></script>
+		<script type="text/javascript" src="NetBackup%20-%20Joe%20Noone_files/wikibits.js"><!-- wikibits js --></script>
+		<!-- Head Scripts -->
+		<script type="text/javascript" src="NetBackup%20-%20Joe%20Noone_files/ajax.js"></script>
+		<script type="text/javascript" src="NetBackup%20-%20Joe%20Noone_files/a.html"><!-- site js --></script>
+<!--
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:dc="http://purl.org/dc/elements/1.1/"
+         xmlns:trackback="http://madskills.com/public/xml/rss/module/trackback/">
+<rdf:Description
+   rdf:about="http://editthis.info/joe_noone/NetBackup"
+   dc:identifier="http://editthis.info/joe_noone/NetBackup"
+   dc:title="NetBackup"
+   trackback:ping="http://editthis.info/joe_noone/trackback.php?article=NetBackup" />
+</rdf:RDF>
+-->	<script>try {  for(var lastpass_iter=0; lastpass_iter < document.forms.length; lastpass_iter++){    var lastpass_f = document.forms[lastpass_iter];    if(typeof(lastpass_f.lpsubmitorig)=="undefined"){      if (typeof(lastpass_f.submit) == "function") {        lastpass_f.lpsubmitorig = lastpass_f.submit;        lastpass_f.submit = function(){          var form = this;          try {            if (document.documentElement && 'createEvent' in document)            {              var forms = document.getElementsByTagName('form');              for (var i=0 ; i<forms.length ; ++i)                if (forms[i]==form)                {                  var element = document.createElement('lpformsubmitdataelement');                  element.setAttribute('formnum',i);                  element.setAttribute('from','submithook');                  document.documentElement.appendChild(element);                  var evt = document.createEvent('Events');                  evt.initEvent('lpformsubmit',true,false);                  element.dispatchEvent(evt);                  break;                }            }          } catch (e) {}          try {            form.lpsubmitorig();          } catch (e) {}        }      }    }  }} catch (e) {}</script></head>
+<body class="mediawiki ltr ns-0 ns-subject page-NetBackup skin-monobook">
+	<div id="globalWrapper">
+		<div id="column-content">
+
+	<div id="content">
+		<a name="top" id="top"></a>
+				<h1 id="firstHeading" class="firstHeading">NetBackup</h1>
+		<div id="bodyContent">
+			<h3 id="siteSub">From Joe Noone</h3>
+			<div id="contentSub"></div>
+												<!-- start content -->
+			<table id="toc" class="toc" summary="Contents"><tbody><tr><td><div id="toctitle"><h2>Contents</h2> <span class="toctoggle">[<a href="javascript:toggleToc()" class="internal" id="togglelink">hide</a>]</span></div>
+<ul>
+<li class="toclevel-1"><a href="#Show_Jukebox_Info"><span class="tocnumber">1</span> <span class="toctext">Show Jukebox Info</span></a></li>
+<li class="toclevel-1"><a href="#Eject_tapes"><span class="tocnumber">2</span> <span class="toctext">Eject tapes</span></a></li>
+<li class="toclevel-1"><a href="#Inject_.28load.29_Multiple_Tapes"><span class="tocnumber">3</span> <span class="toctext">Inject (load) Multiple Tapes</span></a></li>
+<li class="toclevel-1"><a href="#Show_Job_Activity"><span class="tocnumber">4</span> <span class="toctext">Show Job Activity</span></a></li>
+<li class="toclevel-1"><a href="#Scripts"><span class="tocnumber">5</span> <span class="toctext">Scripts</span></a>
+<ul>
+<li class="toclevel-2"><a href="#Show_contents_of_tape"><span class="tocnumber">5.1</span> <span class="toctext">Show contents of tape</span></a></li>
+<li class="toclevel-2"><a href="#Manually_recycle_Tape"><span class="tocnumber">5.2</span> <span class="toctext">Manually recycle Tape</span></a>
+<ul>
+<li class="toclevel-3"><a href="#Eject_Multiple_Tapes"><span class="tocnumber">5.2.1</span> <span class="toctext">Eject Multiple Tapes</span></a></li>
+<li class="toclevel-3"><a href="#Show_Monthly_Tapes"><span class="tocnumber">5.2.2</span> <span class="toctext">Show Monthly Tapes</span></a></li>
+<li class="toclevel-3"><a href="#Eject_Monthly_Tapes"><span class="tocnumber">5.2.3</span> <span class="toctext">Eject Monthly Tapes</span></a></li>
+<li class="toclevel-3"><a href="#Show_Tapes_in_Jukebox"><span class="tocnumber">5.2.4</span> <span class="toctext">Show Tapes in Jukebox</span></a></li>
+<li class="toclevel-3"><a href="#Backup_Total"><span class="tocnumber">5.2.5</span> <span class="toctext">Backup Total</span></a></li>
+<li class="toclevel-3"><a href="#Daily_Report"><span class="tocnumber">5.2.6</span> <span class="toctext">Daily Report</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1"><a href="#User_Accounts"><span class="tocnumber">6</span> <span class="toctext">User Accounts</span></a></li>
+</ul>
+</td></tr></tbody></table><script type="text/javascript"> if (window.showTocToggle) { var tocShowText = "show"; var tocHideText = "hide"; showTocToggle(); } </script>
+<p><b>Note, my work is based on running Netbackup on Solaris</b>
+</p>
+<ul><li>Problems with <a href="http://seer.entsupport.symantec.com/docs/282709.htm" class="external text" title="http://seer.entsupport.symantec.com/docs/282709.htm" rel="nofollow">failed to connect</a>. Had this issue with new client installed and TCP_Wrappers was enabled by default. See <a href="http://editthis.info/joe_noone/Tcp_wrappers" title="Tcp wrappers">HERE</a> to fix.
+</li></ul>
+<ul><li> <u>Restoring</u>: <a href="http://www.symantec.com/business/support/index?page=content&amp;id=TECH16458" class="external text" title="http://www.symantec.com/business/support/index?page=content&amp;id=TECH16458" rel="nofollow">How to restore multiple files based on wildcards via the command line</a>
+</li></ul>
+<a name="Show_Jukebox_Info" id="Show_Jukebox_Info"></a><h1> <span class="mw-headline">Show Jukebox Info</span></h1>
+<pre># vmchange -res -robot_info -verbose -rn 0 -rt TLD -rh &lt;host&gt;
+
+ROBOT INFORMATION for robot 0:
+        Number of Slots = 50 (7 empty)
+        Number of Mailslots = 5 (0 empty)
+        Number of Drives = 2 (2 empty)
+        Robot type and subtype: tld-&gt;0
+        This robot has a barcode reader
+        Starting slot: 1
+        Ending slot: 50
+        Primary inquiry string: STK~~~~~SL500~~~~~~~~~~~1300. </pre>
+<a name="Eject_tapes" id="Eject_tapes"></a><h1> <span class="mw-headline">Eject tapes</span></h1>
+<pre><u>Eject TL8 or TLD volumes (syntax)</u>
+   vmchange -res -multi_eject [-w] [-verbose]
+            -rn &lt;robot_number&gt; -rt &lt;robot_type&gt; -rh &lt;robot_control_host&gt;
+            -ml &lt;media_id:media_id:...:media_id&gt;
+</pre>
+<p><b>** NOTE **</b> There is "gotcha" stuff discussed <a href="http://www.backupcentral.com/phpBB2/two-way-mirrors-of-external-mailing-lists-3/symantec-netbackup-18/does-anyone-use-their-own-scripts-to-eject-tapes-93849/" class="external text" title="http://www.backupcentral.com/phpBB2/two-way-mirrors-of-external-mailing-lists-3/symantec-netbackup-18/does-anyone-use-their-own-scripts-to-eject-tapes-93849/" rel="nofollow">here</a> and <a href="http://www.symantec.com/connect/forums/unassisted-tape-ejections-vmchange-command" class="external text" title="http://www.symantec.com/connect/forums/unassisted-tape-ejections-vmchange-command" rel="nofollow">here</a>.
+</p>
+<a name="Inject_.28load.29_Multiple_Tapes" id="Inject_.28load.29_Multiple_Tapes"></a><h1> <span class="mw-headline">Inject (load) Multiple Tapes</span></h1>
+<pre>/usr/openv/volmgr/bin/vmchange -res -multi_inject -w -verbose  -rn 0 -rt TLD -rh &lt;HOST&gt; -single_cycle
+
+Slot# MediaID Barcode     MAP_Element#  Batch  Status
+    9 ------  A02023                 1      1  Injected.
+   17 ------  A02017                 2      1  Injected.
+   18 ------  A02022                 3      1  Injected.
+   21 ------  A02016                 4      1  Injected.
+   22 ------  A02006                 5      1  Injected.
+
+** NOTE: Be sure to run vmupdate afterwards ***
+   /usr/openv/volmgr/binvmupdate -rt TLD -rn 0 -rh $MEDIA_HOST
+</pre>
+<a name="Show_Job_Activity" id="Show_Job_Activity"></a><h1> <span class="mw-headline">Show Job Activity</span></h1>
+<pre>/opt/openv/netbackup/bin/admincmd/bpdbjobs -report
+</pre>
+<p><br><br>
+</p>
+<hr>
+<a name="Scripts" id="Scripts"></a><h1> <span class="mw-headline">Scripts</span></h1>
+<p><a href="http://www.ipnom.com/Legato-NetWorker-Commands/" class="external text" title="http://www.ipnom.com/Legato-NetWorker-Commands/" rel="nofollow">Networker Commands Manual</a> 
+</p>
+<a name="Show_contents_of_tape" id="Show_contents_of_tape"></a><h2> <span class="mw-headline">Show contents of tape</span></h2>
+<pre> #!/bin/ksh
+ if [ $# -eq 1 ]; 
+        then /usr/sbin/nsr/mminfo -avot -q '!ssrecycle,'volume=$1
+        else echo "Syntax is $0 &lt;tape_volume_name&gt;"
+ fi </pre>
+<a name="Manually_recycle_Tape" id="Manually_recycle_Tape"></a><h2> <span class="mw-headline">Manually recycle Tape</span></h2>
+<pre> #!/bin/ksh
+ if [ $# -eq 1 ]; 
+        then /usr/sbin/nsr/nsrjb -LRYv $1
+        else echo "Syntax is $0 &lt;tape_volume_name&gt;"
+ fi </pre>
+<a name="Eject_Multiple_Tapes" id="Eject_Multiple_Tapes"></a><h3> <span class="mw-headline">Eject Multiple Tapes</span></h3>
+<pre>#!/bin/ksh
+MEDIA_HOST=backuphost
+if [[ $#&nbsp;!= 1 ]]
+then    echo "enter tape #'s seperated by colons (i.e. A2200:A2201:A2202)"
+        read j
+        echo "Ejecting Tapes: $j"
+else    j=$1
+fi
+
+i=`/usr/bin/echo $j | /usr/bin/tr "[:lower:]" "[:upper:]"`
+
+COMMAND1="/usr/openv/volmgr/bin/vmupdate -rt tld -rn 0 -rh $MEDIA_HOST -vh $MEDIA_HOST \
+-use_barcode_rules -empty_map"
+
+COMMAND2="/usr/openv/volmgr/bin/vmchange -res -multi_eject -w -verbose -rn 0 -rt TLD \
+-rh $MEDIA_HOST -ml $i -single_cycle"
+
+echo "Updating Tape List"
+$COMMAND1
+
+echo;echo "Running: $COMMAND2
+$COMMAND2
+</pre>
+<a name="Show_Monthly_Tapes" id="Show_Monthly_Tapes"></a><h3> <span class="mw-headline">Show Monthly Tapes</span></h3>
+<pre>#!/bin/sh
+SCHEDULE=&lt;schedule&gt;     #For example,"Monthly_Full"
+
+echo
+echo "Month End tapes to pull:"
+echo "========================"
+
+# checks 20 days back for any with backup schedule named $SCHEDULE
+/usr/openv/netbackup/bin/admincmd/bpimagelist -sl $SCHEDULE -U -media -hoursago 480 2&gt;&amp;1
+
+echo
+</pre>
+<a name="Eject_Monthly_Tapes" id="Eject_Monthly_Tapes"></a><h3> <span class="mw-headline">Eject Monthly Tapes</span></h3>
+<pre>#!/bin/ksh
+
+MEDIA_HOST=&lt;host&gt;
+SCHEDULE=Monthly_Full
+
+AA=`/usr/openv/netbackup/bin/admincmd/bpimagelist -sl $SCHEDULE -l -media -hoursago 480 | awk '{printf"%s:",$1}'`
+TAPES=${AA%?}
+COMMAND1="/usr/openv/volmgr/bin/vmupdate -rt tld -rn 0 -rh $MEDIA_HOST -vh $MEDIA_HOST -use_barcode_rules -empty_map"
+COMMAND2="/usr/openv/volmgr/bin/vmchange -res -multi_eject -w -verbose -rn 0 -rt TLD -rh $MEDIA_HOST -ml $TAPES -single_cycle"
+
+echo;echo "*** Updating Tape List ***"; 
+echo;echo "$COMMAND1"&nbsp;; echo
+$COMMAND1 2&gt;&amp;1
+
+echo;echo "*** Ejecting $TAPES ***"; 
+echo;echo "$COMMAND2"&nbsp;; echo
+$COMMAND2 2&gt;&amp;1
+</pre>
+<p><br>
+</p>
+<a name="Show_Tapes_in_Jukebox" id="Show_Tapes_in_Jukebox"></a><h3> <span class="mw-headline">Show Tapes in Jukebox</span></h3>
+<pre>#!/bin/sh
+
+#########################
+# Shows tapes in jukebox
+# and how much has been 
+# written to them
+#########################
+
+######################################################
+# REMEMBER: Don't assume path variables are set right
+######################################################
+VMCHECK=/usr/openv/volmgr/bin/vmcheckxxx 
+MEDIA_LIST="/usr/openv/netbackup/bin/admincmd/bpmedialist -mlist -l -ev" 
+AWK=/usr/bin/awk
+TAIL=/usr/bin/tail
+ECHO=/usr/bin/echo
+
+#
+# Lets do it...
+#
+
+printf "%-8s%-7st%sn" 'Slot #' 'Tape #' 'KBs Written' '------' '------' '-----------'
+$VMCHECK -rt tld -rn 0 2&gt;/dev/null | $TAIL +6 | $AWK '{print $1,$4}'|
+
+while read slot_no tape_no
+do
+        amt_written=`$MEDIA_LIST $tape_no 2&gt;/dev/null | $AWK '{print $9}'` 
+        printf "%-8s%-7st%+11s&nbsp;%sn" "$slot_no" "$tape_no" "$amt_written" 
+done
+</pre>
+<a name="Backup_Total" id="Backup_Total"></a><h3> <span class="mw-headline">Backup Total</span></h3>
+<pre>#!/bin/ksh
+
+############################
+# Totals up how much backed
+# up over the last 24 hours
+############################
+
+TOT_KB=`/usr/openv/netbackup/bin/admincmd/bperror -all -hoursago 24 
+ | /usr/bin/grep "successfully wrote backup id" 
+ | /usr/bin/awk '{bytes += $20} END {printf "%sn",bytes}'`
+
+let TOT_MB=TOT_KB/1000
+let TOT_GB=TOT_MB/1000
+
+echo "Total backed up is:  $TOT_GB GB  ( $TOT_MB MB / $TOT_KB KB)" 
+ | /usr/bin/sed -e&nbsp;:a -e 's/(.*[0-9])([0-9]{3})/1,2/;ta'
+</pre>
+<a name="Daily_Report" id="Daily_Report"></a><h3> <span class="mw-headline">Daily Report</span></h3>
+<pre>#!/bin/ksh
+
+SED=/usr/bin/sed
+AWK=/usr/bin/awk
+GREP=/usr/bin/grep
+SORT=/usr/bin/sort
+ECHO=/usr/bin/echo
+DATE=/usr/bin/date
+
+#----------------------------------------------------------------------
+Total() {
+   TOT_KB=`/usr/openv/netbackup/bin/admincmd/bperror -all -hoursago 24 
+        | $GREP "successfully wrote backup id" 
+        | $AWK '{bytes += $20} END {printf "%sn",bytes}'`
+   let TOT_MB=TOT_KB/1000
+   let TOT_GB=TOT_MB/1000
+   $ECHO "Total backed up is:  $TOT_GB GB  ( $TOT_MB MB / $TOT_KB KB)" 
+        | $SED -e&nbsp;:a -e 's/(.*[0-9])([0-9]{3})/1,2/;ta'
+} #---------------------------------------------------------------------
+Errors() { 
+   /usr/openv/netbackup/bin/admincmd/bperror -U -problems -hoursago 24
+} #---------------------------------------------------------------------
+Written() {
+   /usr/openv/netbackup/bin/admincmd/bpimagelist -U -hoursago 24
+} #---------------------------------------------------------------------
+Written_Contents() {
+   /usr/openv/netbackup/bin/admincmd/bpimmedia -U  -d `TZ=aaa24 $DATE +%m/%d/%y`
+} #---------------------------------------------------------------------
+Tapes_Used() {
+   /usr/openv/netbackup/bin/admincmd/bpimagelist -hoursago 24 -U -media 
+} #---------------------------------------------------------------------
+
+
+$ECHO&nbsp;; $DATE&nbsp;; $ECHO
+Tapes_Used
+Total
+
+$ECHO&nbsp;; $ECHO "====== Errors =================================================="
+Errors
+
+$ECHO&nbsp;; $ECHO "====== Ammount written per backup policy ========================"
+Written
+
+# $ECHO&nbsp;; $ECHO "====== Contents of Media Written ==============================="
+Written_Contents
+</pre>
+<p><br><br>
+</p>
+<hr>
+<a name="User_Accounts" id="User_Accounts"></a><h1> <span class="mw-headline">User Accounts</span></h1>
+<p>Authorized user are defined in <b>/opt/openv/java/auth.conf</b>. 
+</p>
+<pre>bash-3.00# more /opt/openv/java/auth.conf
+root ADMIN=ALL JBP=ALL
+* ADMIN=JBP JBP=ENDUSER+BU+ARC
+</pre>
+<p><b><u>From the Help file</u>&nbsp;:</b>
+</p>
+<ul><li> First field  is user name. An asterisk here sets that any user 
+name is acceptable (can't be used to authorize all users administrator 
+capabilities). 
+</li><li> to deny capabilities for a specific user, add a line for this 
+user before a line that starts with an asterisk. To deny all just do 
+something like "<b>joe ADMIN= JBP=</b>"
+</li><li> The <b>ADMIN</b> keyword specifies what applications the user can run.
+<ul><li> ALL - all
+</li><li> AM - Activity Monitoring
+</li><li> BMR - Bare Metal Restore
+</li><li> BPM - Backup Policy Management
+</li><li> BAR or JBP - Backup, Archive, and Restore
+</li><li> CAT - Catalog
+</li><li> DM - Device Monitor
+</li><li> HPD - Host Properties
+</li><li> MM - Media Management
+</li><li> REP - Reports
+</li><li> SUM - Storage Unit Management
+</li><li> VLT - Vault Management
+</li></ul>
+</li><li> The <b>JSB</b> keyword specifies what a user can do with 
+Backup, Archive, and Restore client application (jbpSA). JBP=ALL allows 
+access to all these capabilities including administration. The other 
+options are&nbsp;:
+<ul><li> ENDUSER - allowed to do restores
+</li><li> BU - allowed to do backups
+</li><li> ARC - allowed to do archive tasks (need BU permissions as well)
+</li><li> RAWPART - allowed to doraw partition restores
+</li><li> ALL (see above)
+</li></ul>
+</li></ul>
+
+<!-- 
+NewPP limit report
+Preprocessor node count: 48/1000000
+Post-expand include size: 0/2097152 bytes
+Template argument size: 0/2097152 bytes
+Expensive parser function count: 0/100
+-->
+
+<!-- Saved in parser cache with key joe_noone:pcache:idhash:1316-0!1!0!!en!2!edit=0 and timestamp 20130418151529 -->
+<div class="printfooter">
+Retrieved from "<a href="http://editthis.info/joe_noone/NetBackup">http://editthis.info/joe_noone/NetBackup</a>"</div>
+						<!-- end content -->
+
+						    <!-- adult word DEBUG  load -->  <!-- Begin: adBrite, Generated: 2011-07-06 14:21:37  -->
+<div style="width:100%">
+<script type="text/javascript">
+  var AdBrite_Title_Color = '0000FF';
+var AdBrite_Text_Color = '000000';
+var AdBrite_Background_Color = 'FFFFFF';
+var AdBrite_Border_Color = 'CCCCCC';
+var AdBrite_URL_Color = '008000';
+try{var AdBrite_Iframe=window.top!=window.self?2:1;var AdBrite_Referrer=document.referrer==''?document.location:document.referrer;AdBrite_Referrer=encodeURIComponent(AdBrite_Referrer);}catch(e){var AdBrite_Iframe='';var AdBrite_Referrer='';}
+</script>
+<span style="white-space:nowrap;"><script type="text/javascript">document.write(String.fromCharCode(60,83,67,82,73,80,84));document.write(' src="http://ads.adbrite.com/mb/text_group.php?sid=887123&zs=3732385f3930&ifr='+AdBrite_Iframe+'&ref='+AdBrite_Referrer+'" type="text/javascript">');document.write(String.fromCharCode(60,47,83,67,82,73,80,84,62));</script><script src="NetBackup%20-%20Joe%20Noone_files/text_group.html" type="text/javascript"></script>
+<a target="_top" href="http://www.adbrite.com/mb/commerce/purchase_form.php?opid=887123&amp;afsid=1"><img src="NetBackup%20-%20Joe%20Noone_files/adbrite-your-ad-here-leaderboard.html" style="background-color:#CCCCCC;border:none;padding:0;margin:0;" alt="Your Ad Here" border="0" height="90" width="14"></a></span>
+																																				  <!-- End: adBrite -->
+</div>
+			<div class="visualClear"></div>
+
+		</div>
+	</div>
+		</div>
+		<div id="column-one">
+	<div id="p-cactions" class="portlet">
+		<h5>Views</h5>
+		<div class="pBody">
+			<ul>
+	
+				 <li id="ca-nstab-main" class="selected"><a href="http://editthis.info/joe_noone/NetBackup" title="View the content page [alt-shift-c]" accesskey="c">Page</a></li>
+				 <li id="ca-talk" class="new"><a href="http://editthis.info/joe_noone/?title=Talk:NetBackup&amp;action=edit&amp;redlink=1" title="Discussion about the content page [alt-shift-t]" accesskey="t">Discussion</a></li>
+				 <li id="ca-viewsource"><a href="http://editthis.info/joe_noone/?title=NetBackup&amp;action=edit" title="This page is protected.
+You can view its source [alt-shift-e]" accesskey="e">View source</a></li>
+				 <li id="ca-history"><a href="http://editthis.info/joe_noone/?title=NetBackup&amp;action=history" title="Past revisions of this page [alt-shift-h]" accesskey="h">History</a></li>			</ul>
+		</div>
+	</div>
+	<div class="portlet" id="p-personal">
+		<h5>Personal tools</h5>
+		<div class="pBody">
+			<ul>
+				<li id="pt-login"><a href="http://editthis.info/joe_noone/?title=Special:UserLogin&amp;returnto=NetBackup" title="You are encouraged to log in; however, it is not mandatory [alt-shift-o]" accesskey="o">Log in</a></li>
+			</ul>
+		</div>
+	</div>
+	<div class="portlet" id="p-logo">
+		<a style="background-image: url(http://joenoone.freeshell.org/slider2.gif);" href="http://editthis.info/joe_noone/Main_Page" title="Visit the main page [alt-shift-z]" accesskey="z"></a>
+	</div>
+	<script type="text/javascript"> if (window.isMSIE55) fixalpha(); </script>
+	<div class="generated-sidebar portlet" id="p-navigation">
+		<h5>Navigation</h5>
+		<div class="pBody">
+			<ul>
+				<li id="n-mainpage-description"><a href="http://editthis.info/joe_noone/Main_Page">Main Page</a></li>
+				<li id="n-portal"><a href="http://editthis.info/joe_noone/Joe_Noone:Community_Portal" title="About the project, what you can do, where to find things">Community portal</a></li>
+				<li id="n-currentevents"><a href="http://editthis.info/joe_noone/Joe_Noone:Current_events" title="Find background information on current events">Current events</a></li>
+				<li id="n-recentchanges"><a href="http://editthis.info/joe_noone/Special:RecentChanges" title="The list of recent changes in the wiki [alt-shift-r]" accesskey="r">Recent changes</a></li>
+				<li id="n-randompage"><a href="http://editthis.info/joe_noone/Special:Random" title="Load a random page [alt-shift-x]" accesskey="x">Random page</a></li>
+				<li id="n-help"><a href="http://editthis.info/wiki/Help:Contents" title="The place to find out">Help</a></li>
+			</ul>
+		</div>
+	</div>
+	<div id="p-search" class="portlet">
+		<h5><label for="searchInput">Search</label></h5>
+		<div id="searchBody" class="pBody">
+			<form action="/joe_noone/" id="searchform"><div>
+				<input name="title" value="Special:Search" type="hidden">
+				<input id="searchInput" name="search" title="Search Joe Noone [alt-shift-f]" accesskey="f" type="text">
+				<input name="go" class="searchButton" id="searchGoButton" value="Go" title="Go to a page with this exact name if exists" type="submit">&nbsp;
+				<input name="fulltext" class="searchButton" id="mw-searchButton" value="Search" title="Search the pages for this text" type="submit">
+			</div></form>
+		</div>
+	</div>
+
+        <div class="portlet" id="editthis">
+            <h5><a href="http://editthis.info/">EditThis.info</a> tools</h5>
+               <div class="pBody">
+                <ul>
+<li><a href="http://editthis.info/">Create a Wiki</a></li>
+<li><a rel="nofollow" href="http://editthis.info/joe_noone/NetBackup?action=purge">Clear Page Cache</a></li>
+<li><a rel="nofollow" href="https://bugs.editthis.info/">Report a Bug</a></li>
+<li><a href="http://groups.google.com/group/editthisinfo">News  Group</a></li>
+<li><a href="http://editthis.uservoice.com/pages/35672-feature-requests">Request a Feature</a></li>
+<li><a rel="nofollow" href="http://editthis.info/joe_noone/Special:ControlPanel">Control Panel</a></li>
+
+</ul>
+               </div>
+        </div>
+
+	<div class="portlet" id="p-tb">
+		<h5>Toolbox</h5>
+		<div class="pBody">
+			<ul>
+				<li id="t-whatlinkshere"><a href="http://editthis.info/joe_noone/Special:WhatLinksHere/NetBackup" title="List of all wiki pages that link here [alt-shift-j]" accesskey="j">What links here</a></li>
+				<li id="t-recentchangeslinked"><a href="http://editthis.info/joe_noone/Special:RecentChangesLinked/NetBackup" title="Recent changes in pages linked from this page [alt-shift-k]" accesskey="k">Related changes</a></li>
+			<li id="t-trackbacklink"><a href="http://editthis.info/joe_noone/trackback.php?article=NetBackup">Trackback</a></li>
+<li id="t-specialpages"><a href="http://editthis.info/joe_noone/Special:SpecialPages" title="List of all special pages [alt-shift-q]" accesskey="q">Special pages</a></li>
+				<li id="t-print"><a href="http://editthis.info/joe_noone/?title=NetBackup&amp;printable=yes" rel="alternate" title="Printable version of this page [alt-shift-p]" accesskey="p">Printable version</a></li>				<li id="t-permalink"><a href="http://editthis.info/joe_noone/?title=NetBackup&amp;oldid=1436" title="Permanent link to this revision of the page">Permanent link</a></li>			</ul>
+		</div>
+	</div>
+
+        <div class="portlet" id="editthis">
+            <h5>Other sites</h5>
+               <div class="pBody">
+                <ul>
+	<li><a href="http://cueflash.com/">Flashcards</a></li>
+	<li><a href="http://constantsail.com/">Pirate Game</a></li>
+        <li><a href="http://printcoins.com/">Physical Bitcoins</a></li>
+        <li><a href="http://www.namecheap.com/">Domain Registration</a></li>
+	</ul>
+               </div>
+        </div>
+		</div><!-- end of the left (by default at least) column -->
+			<div class="visualClear"></div>
+			<div id="footer">
+				<div id="f-poweredbyico"><a href="http://www.mediawiki.org/"><img src="NetBackup%20-%20Joe%20Noone_files/poweredby_mediawiki_88x31.png" alt="Powered by MediaWiki"></a></div>
+			<ul id="f-list">
+					<li id="lastmod"> This page was last modified on 1 March 2012, at 14:22.</li>
+					<li id="privacy"><a href="http://editthis.info/joe_noone/Joe_Noone:Privacy_policy" title="Joe Noone:Privacy policy">Privacy policy</a></li>
+					<li id="about"><a href="http://editthis.info/joe_noone/Joe_Noone:About" title="Joe Noone:About">About Joe Noone</a></li>
+					<li id="disclaimer"><a href="http://editthis.info/joe_noone/Joe_Noone:General_disclaimer" title="Joe Noone:General disclaimer">Disclaimers</a></li>
+			</ul>
+		</div>
+</div>
+
+		<script type="text/javascript">if (window.runOnloadHook) runOnloadHook();</script>
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script><script src="NetBackup%20-%20Joe%20Noone_files/ga.js" type="text/javascript"></script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-600316-1");
+pageTracker._initData();
+pageTracker._trackPageview();
+</script><!-- Served in 7.462 secs. -->
+
+</body><!-- Cached 20130418151531 --></html>

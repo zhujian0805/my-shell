@@ -1,0 +1,1 @@
+/asp/FPA/FPA2.2/bin/FPA_processjobcards.ksh

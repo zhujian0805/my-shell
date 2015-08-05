@@ -1,0 +1,12 @@
+#!/bin/ksh
+
+echo "TESTING sus"
++ echo TESTING sus
+TESTING sus
+suspend
++ [[ ./j.ksh = ./j.ksh ]]
++ kill -STOP 1486890
+echo "RELEASED"
++ echo RELEASED
+RELEASED
+
