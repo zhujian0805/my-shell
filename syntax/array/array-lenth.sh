@@ -21,4 +21,4 @@ set -o nounset                              # Treat unset variables as an error
 declare -a Unix=('Debian' 'Red hat' 'Suse' 'Fedora');
 echo ${#Unix[@]} #Number of elements in the array
 echo ${#Unix}  #Number of characters in the first element of the array.i.e Debian
-
+echo ${#Unix[1]}
