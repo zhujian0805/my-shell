@@ -21,9 +21,10 @@
 
 
 
-if [ $a != 'abc' ]
+if [ x$a != x'abc' ] ## Adding 'x' to avoid no defined $a
+#if [ $a != 'abc' ]
 then
-    print YES
+    echo YES
 fi 
 
 
