@@ -4,3 +4,6 @@ http://aws.amazon.com/articles/8800869755706543
 https://aws.amazon.com/articles/5472675506466066
 # High Availability for Amazon VPC NAT Instances: An Example
 http://aws.amazon.com/articles/2781451301784570
+
+# Keepalived
+https://raymii.org/s/tutorials/Keepalived_notify_script_execute_action_on_failover.html
