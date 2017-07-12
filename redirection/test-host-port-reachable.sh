@@ -27,3 +27,5 @@ echo $?
 echo somthing > /dev/tcp/localhost/22
 echo $?
 
+# For example, you can connect to the 22 on localhost
+cat < /dev/tcp/localhost/22
