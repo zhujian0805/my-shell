@@ -3,7 +3,7 @@
 
 #!/bin/sh
 
-git filter-branch --env-filter '
+git filter-branch -f --env-filter '
 
 OLD_EMAIL="jzhu@blizzard.com"
 CORRECT_NAME="James Zhu"
