@@ -1,8 +1,10 @@
 #!/bin/sh
 
-OLD_EMAIL=$1
-CORRECT_NAME=$2
-CORRECT_EMAIL=$3
+OLD_EMAIL=shift
+CORRECT_NAME=shift
+CORRECT_EMAIL=shift
+
+echo $OLD_EMAIL
 
 git filter-branch -f --env-filter "
 
