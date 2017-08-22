@@ -1,12 +1,11 @@
 #!/bin/sh
 
-OLD_EMAIL=shift
-CORRECT_NAME=shift
-CORRECT_EMAIL=shift
-
-echo $OLD_EMAIL
 
 git filter-branch -f --env-filter "
+
+OLD_EMAIL=oldmail@company.com
+CORRECT_NAME=Names
+CORRECT_EMAIL=newmail@company.com
 
 if [ $GIT_COMMITTER_EMAIL = $OLD_EMAIL ]
 then
