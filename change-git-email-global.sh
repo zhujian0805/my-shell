@@ -5,7 +5,7 @@ then
     echo "You must specify 3 parameters!!!"
     echo USAGE:
     echo "./$0 OLD_EMAIL CORRECT_EMAIL CORRECT_EMAIL"
-    echo
+    echo "This script is used to change the email address in the commit history"
     echo
     exit
 fi
