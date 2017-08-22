@@ -21,14 +21,14 @@ echo >>$SCRIPT_NAME
 echo "git filter-branch -f --env-filter '" >>$SCRIPT_NAME
 echo 'if [ $GIT_COMMITTER_EMAIL =' "$OLD_EMAIL ]" >>$SCRIPT_NAME
 echo then >>$SCRIPT_NAME
-echo "    export GIT_COMMITTER_NAME=$CORRECT_NAME" >>$SCRIPT_NAME
-echo "    export GIT_COMMITTER_EMAIL=$CORRECT_EMAIL" >>$SCRIPT_NAME
+echo "    export GIT_COMMITTER_NAME=\"$CORRECT_NAME\"" >>$SCRIPT_NAME
+echo "    export GIT_COMMITTER_EMAIL=\"$CORRECT_EMAIL\"" >>$SCRIPT_NAME
 echo fi >>$SCRIPT_NAME
 echo >>$SCRIPT_NAME
 echo 'if [ $GIT_AUTHOR_EMAIL = '"$OLD_EMAIL ]" >>$SCRIPT_NAME
 echo then >>$SCRIPT_NAME
-echo '    export GIT_AUTHOR_NAME='"$CORRECT_NAME" >>$SCRIPT_NAME
-echo '    export GIT_AUTHOR_EMAIL='"$CORRECT_EMAIL" >>$SCRIPT_NAME
+echo '    export GIT_AUTHOR_NAME='\"$CORRECT_NAME\" >>$SCRIPT_NAME
+echo '    export GIT_AUTHOR_EMAIL='\"$CORRECT_EMAIL\" >>$SCRIPT_NAME
 echo fi >>$SCRIPT_NAME
 echo "' --tag-name-filter cat -- --branches --tags" >>$SCRIPT_NAME
 
