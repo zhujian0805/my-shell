@@ -35,3 +35,4 @@ echo "' --tag-name-filter cat -- --branches --tags" >>$SCRIPT_NAME
 echo "Executing script $SCRIPT_NAME"
 cat $SCRIPT_NAME
 sh $SCRIPT_NAME
+rm -rf $SCRIPT_NAME
