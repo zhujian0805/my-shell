@@ -1,16 +1,13 @@
 #!/bin/sh
 
-if [ $# -lt 3 ]
-then
-    echo "You must specify 3 parameters!"
-    exit 0
-fi
 
-OLD_EMAIL=$1
-CORRECT_NAME=$2
-CORRECT_EMAIL=$3
+#!/bin/sh
 
 git filter-branch --env-filter '
+
+OLD_EMAIL="jzhu@blizzard.com"
+CORRECT_NAME="James Zhu"
+CORRECT_EMAIL="zhujian0805@gmail.com"
 
 if [ "$GIT_COMMITTER_EMAIL" = "$OLD_EMAIL" ]
 then
