@@ -17,7 +17,12 @@
 #      REVISION:  ---
 #===============================================================================
 
-set -o nounset                              # Treat unset variables as an error
+
+if [ $# -lt 2 ]
+then
+    echo "Need 1 parameter"
+    exit
+fi
 
 
 while [ $# -ge 1 ]
@@ -27,12 +32,10 @@ do
         -a)
             shift;
             A="$1";
-            shift;
-            echo "$A";;
+            shift;;
         -b)
             shift;
             B="$1";
-            echo "$B";
             shift;;
         *)
             echo others;
@@ -40,6 +43,12 @@ do
     esac
 done
 
-echo A is "$A"
+if ! [ x"$A" = 'x' ]
+then
+    echo A is "$A"
+fi
 
-echo B is "$B"
+if ! [ x"$B" = 'x' ]
+then
+    echo B is "$B"
+fi
