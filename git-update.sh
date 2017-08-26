@@ -14,41 +14,42 @@ do_me (){
     ACT=$1
     shift
     DIR=$1
-    echo +++++++++++++++++++++++ Start doing $ACT on repo $dir +++++++++++++++++++++++++
+    echo "+++++++++++++++++++++++ Start doing $ACT on repo $dir +++++++++++++++++++++++++"
 
-    cd $DIR
-    if [ $ACT = 'push' ]; then
+    cd "$DIR" || exit
+    if [ x"$ACT" = x'push' ]
+    then
         CHANGES=$(git status -s)
 		git add .
 		git commit -m "changes on $CHANGES"
 		git push -u
     else
-        git $ACT
+        git "$ACT"
     fi
-    cd
-    echo +++++++++++++++++++++++ Finished doing $ACT on repo $DIR +++++++++++++++++++++++++
+    cd || exit
+    echo "+++++++++++++++++++++++ Finished doing $ACT on repo $DIR +++++++++++++++++++++++++"
 
-    cd
+    cd || exit
 }
 
-for dir in $(ls -a1)
+for dir in *
 do
-    if [ -d $dir/.git ]; then
+    if [ -d "$dir/.git" ]; then
 
-        case $ACTION in
+        case "$ACTION" in
             'pull') 
-                    do_me $ACTION $dir;;
+                    do_me "$ACTION" "$dir";;
             'push')
-                    do_me $ACTION $dir;;
+                    do_me "$ACTION" "$dir";;
             'status')
-                    do_me $ACTION $dir;;
+                    do_me "$ACTION" "$dir";;
             'checkout')
-                    do_me $ACTION $dir;;
+                    do_me "$ACTION" "$dir";;
             *)
                     echo "You must supply one push, status, pull"
                     break;;      
         esac           
-        cd
+        cd || exit
     fi
 done
 date
