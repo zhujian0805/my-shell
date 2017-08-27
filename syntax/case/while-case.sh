@@ -5,11 +5,11 @@ while [[ $# -ge 1 ]]; do
   case $arg in
      -p|--profile)
        shift; PROFILE_SHORT="$1"; shift
-       echo $PROFILE_SHORT
+       echo "$PROFILE_SHORT"
        ;;
      -t|--template)
        shift; TEMPLATE_SHORT="$1"; shift
-       echo $TEMPLATE_SHORT
+       echo "$TEMPLATE_SHORT"
        ;;
      --cn|--china)
        shift; CHINA=true
