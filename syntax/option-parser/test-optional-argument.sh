@@ -105,7 +105,7 @@ fi
 if [ $opt_a -ne 0 ]; then
   echo -n "Option --opt_argument is given, "
   if [ "$opt_argument" ]; then
-    echo "optional argument is \"$opt_argument\n"
+    echo "optional argument is $opt_argument"
   else
     echo "but without argument"
   fi
