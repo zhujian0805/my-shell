@@ -54,12 +54,12 @@ green_echo () {
 
 ## Error to warning with blink
 bred_echo () {
-    echo -e "\033[31m\033[01m\033[05m$@\033[0m"
+    echo $@|colorme red black blink
 }
 
 ## Error to warning with blink
 byellow_echo () {
-    echo -e "\033[33m\033[01m\033[05m$@\033[0m"
+    echo $@|colorme yellow
 }
 
 redback_echo () {
