@@ -16,8 +16,18 @@ colorme () {
         cyan)   nn="36";;
         white) 	nn="37";;
     esac  
+    case "$2" in
+        black)  bb=";40";;
+        red)    bb=";41";;
+        green)  bb=";42";;
+        yellow) bb=";43";;
+        blue)   bb=";44";;
+        purple) bb=";45";;
+        cyan)   bb=";46";;
+        white)  bb=";47";;
+    esac
     ff=""  
-    case "$2" in  
+    case "$3" in  
         bold)   ff=";1";;  
         bright) ff=";2";;
         italic) ff=";3";;
@@ -25,7 +35,7 @@ colorme () {
         blink)  ff=";5";;  
         invert) ff=";7";;  
     esac  
-    color_begin=`echo -e -n "\033[${nn}${ff}m"`  
+    color_begin=`echo -e -n "\033[${nn}${bb}${ff}m"`  
     color_end=`echo -e -n "\033[0m"`  
     while read line; do  
         echo "${color_begin}${line}${color_end}"  
@@ -39,7 +49,7 @@ blue_echo () {
 
 ## green to echo 
 green_echo () {
-    echo -e "\033[32m$@\033[0m"
+    echo $@|colorme green
 }
 
 ## Error to warning with blink
