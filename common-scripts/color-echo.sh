@@ -50,18 +50,22 @@ white_echo () {
 }
 
 bw_echo () {
+    # black/white
 	echo -e "\033[40;37m$1\033[0m"
 }
 
 rb_echo () {
+    # red/black
 	echo -e "\033[41;30m$1\033[0m"
 }
 
-gl_echo () {
+gb_echo () {
+    # green/blue
 	echo -e "\033[42;34m$1\033[0m"	
 }
 
-yl_echo () {
+yb_echo () {
+    # yello/blue
 	echo -e "\033[43;34m$1\033[0m"
 }
 
