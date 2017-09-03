@@ -30,3 +30,19 @@ red_echo () {
 yellow_echo () {
     echo -e "\033[33m\033[01m$1\033[0m"
 }
+
+black_echo () {
+	echo -e "\033[30m$1\033[0m"
+}
+
+purple_echo () {
+	echo -e "\033[35m$1\033[0m"
+}
+
+skyblue_echo () {
+	echo -e "\033[36m$1\033[0m"	
+}
+
+white_echo () {
+	echo -e "\033[37m$1\033[0m"
+}
