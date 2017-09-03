@@ -48,3 +48,41 @@ skyblue_echo () {
 white_echo () {
 	echo -e "\033[37m$1\033[0m"
 }
+
+bw_echo () {
+	echo -e "\033[40;37m$1\033[0m"
+}
+
+rb_echo () {
+	echo -e "\033[41;30m$1\033[0m"
+}
+
+gl_echo () {
+	echo -e "\033[42;34m$1\033[0m"	
+}
+
+yl_echo () {
+	echo -e "\033[43;34m$1\033[0m"
+}
+
+bb_echo () {
+	# blue/black
+	echo -e "\033[44;30m$1\033[0m"
+}
+
+pb_echo () {
+	# purple/black
+	echo -e "\033[45;30m$1\033[0m"
+}
+
+sbb_echo () {
+	# sky blue black
+	echo -e "\033[46;30m$1\033[0m"
+}
+
+wb_echo () {
+	# white blue
+	echo -e "\033[47;34m$1\033[0m"
+}
+
+
