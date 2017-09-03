@@ -5,8 +5,7 @@
 # Color coding
 # https://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
 
-function colorme()  
-{  
+colorme () {  
     case "$1" in  
     	black) 	nn="30";;
         red)    nn="31";;  
@@ -35,7 +34,7 @@ function colorme()
 
 ## blue to echo 
 blue_echo () {
-    echo -e "\033[34m$@\033[0m"
+    echo $@|colorme blue
 }
 
 ## green to echo 
