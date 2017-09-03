@@ -7,6 +7,7 @@ do
             echo "next arg index:$OPTIND";;
         m)
             echo "option:m"
+            echo "option:h, value $OPTARG"
             echo "next arg index:$OPTIND";;
         s)
             echo "option:s"
