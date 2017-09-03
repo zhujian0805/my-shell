@@ -15,13 +15,13 @@ function colorme()
         blue)   nn="34";;  
         purple) nn="35";;  
         cyan)   nn="36";;
-		white) 	nn="37";;
+        white) 	nn="37";;
     esac  
     ff=""  
     case "$2" in  
         bold)   ff=";1";;  
         bright) ff=";2";;
-		italic) ff=";3";;
+        italic) ff=";3";;
         uscore) ff=";4";;  
         blink)  ff=";5";;  
         invert) ff=";7";;  
