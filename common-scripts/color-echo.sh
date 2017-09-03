@@ -1,5 +1,6 @@
 # Examples:
 # http://blog.csdn.net/lidonghat/article/details/60584573
+# http://blog.csdn.net/hepeng597/article/details/7743853
 
 function colorme()  
 {  
