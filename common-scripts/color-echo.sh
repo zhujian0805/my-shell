@@ -1,3 +1,5 @@
+# Examples:
+# http://blog.csdn.net/lidonghat/article/details/60584573
 ## blue to echo 
 blue_echo () {
     echo -e "\033[34m$1\033[0m"
