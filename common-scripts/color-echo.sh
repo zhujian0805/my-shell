@@ -1,32 +1,32 @@
 ## blue to echo 
-function blue(){
+blue_echo () {
     echo -e "\033[34m[ $1 ]\033[0m"
 }
 
 ## green to echo 
-function green(){
+green_echo () {
     echo -e "\033[32m[ $1 ]\033[0m"
 }
 
 ## Error to warning with blink
-function bred(){
+bred_echo () {
     echo -e "\033[31m\033[01m\033[05m[ $1 ]\033[0m"
 }
 
 ## Error to warning with blink
-function byellow(){
+byellow_echo () {
     echo -e "\033[33m\033[01m\033[05m[ $1 ]\033[0m"
 }
 
-redback () {
+redback_echo () {
     echo -e "\033[41;37m[ $1 ]\033[0m"
 }
 ## Error
-function red(){
+red_echo () {
     echo -e "\033[31m\033[01m[ $1 ]\033[0m"
 }
 
 ## warning
-function yellow(){
+yellow_echo () {
     echo -e "\033[33m\033[01m[ $1 ]\033[0m"
 }
