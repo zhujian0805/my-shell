@@ -2,6 +2,9 @@
 # http://blog.csdn.net/lidonghat/article/details/60584573
 # http://blog.csdn.net/hepeng597/article/details/7743853
 
+# Color coding
+# https://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
+
 function colorme()  
 {  
     case "$1" in  
