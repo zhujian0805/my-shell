@@ -32,7 +32,7 @@ do_me (){
     cd || exit
 }
 
-for dir in *
+for dir in $(ls -a1)
 do
     if [ -d "$dir/.git" ]; then
 
