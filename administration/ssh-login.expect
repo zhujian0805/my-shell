@@ -1,9 +1,26 @@
 #!/usr/bin/expect -f
 set timeout 2
 set hostname [lindex $argv 0]
-set username "$env(LOGNAME)"
-set password "$env(LDAPUSERPW)"
 set send_slow {10 .001}
+
+# Set LOGNAME
+if [ info exists env(LOGNAME) ] {
+    set username "$env(LOGNAME)"
+} else {
+    set username "jzhu"
+}
+
+# Check if PASSWORD IS SET
+if [info exists env(LDAPUSERPW)] {
+    set password "$env(LDAPUSERPW)"
+} else {
+    send_user "**********************************************************" 
+    send_user "\nYou have not setup LDAPUSERPW for your account\n"
+    send_user "**********************************************************\n" 
+    exit 1
+}
+
+
 log_user 0
 
 if {[llength $argv] == 0} {
@@ -20,13 +37,6 @@ if {[info exists hostname ]} {
 
 } else {
     send_user "\nYou have not specify target host to login\n"
-    exit 1
-}
-
-if {[info exists password ]} {
-
-} else {
-    send_user "\nYou have not setup LDAPUSERPW for your account\n"
     exit 1
 }
 
