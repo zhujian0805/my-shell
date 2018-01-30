@@ -3,6 +3,15 @@ set timeout 2
 set hostname [lindex $argv 0]
 set send_slow {10 .001}
 
+# Check command argument
+if {[llength $argv] == 0} {
+    exec clear
+    send_user "**********************************************************\n" 
+    send_user "At least you need to specify the target host to login\n"
+    send_user "**********************************************************\n" 
+    exit 1
+}
+
 # Set LOGNAME
 if [ info exists env(LOGNAME) ] {
     set username "$env(LOGNAME)"
@@ -22,14 +31,6 @@ if [info exists env(LDAPUSERPW)] {
 
 
 log_user 0
-
-if {[llength $argv] == 0} {
-    exec clear
-    send_user "**********************************************************\n" 
-    send_user "At least you need to specify the target host to login\n"
-    send_user "**********************************************************\n" 
-    exit 1
-}
 
 send_user "login $hostname\n"
 
