@@ -19,7 +19,7 @@
 
 set -o nounset                              # Treat unset variables as an error
 
-if ETHPCI=$(lspci |grep -i eth)
+if ETHPCI=$(lspci |grep -i ether || dmesg|grep -i ether)
 then
     echo "Ethnet PCI devices is present:"
     echo "----------------------------------------------"
