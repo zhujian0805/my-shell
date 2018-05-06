@@ -37,6 +37,6 @@ ping -c3 `hostname`
 
 traceroute -I baidu.com
 
-netstat -tulpa
+netstat -tulpa|head -20
 
 sestatus
