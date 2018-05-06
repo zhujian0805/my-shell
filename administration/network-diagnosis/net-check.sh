@@ -19,13 +19,24 @@
 
 set -o nounset                              # Treat unset variables as an error
 
-if ETHPCI=$(lspci |grep -i ether || dmesg|grep -i ether)
-then
-    echo "Ethnet PCI devices is present:"
-    echo "----------------------------------------------"
-    echo "$ETHPCI"
-fi
+lspci |grep -i ether 
+
+dmesg|grep -i ether
+
+ping -c 3 8.8.8.8
 
 ifconfig
 
 route -n
+
+host baidu.com
+
+hostname
+
+ping -c3 `hostname`
+
+traceroute -I baidu.com
+
+netstat -tulpa
+
+sestatus
