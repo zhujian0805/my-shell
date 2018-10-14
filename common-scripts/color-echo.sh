@@ -6,6 +6,7 @@
 # https://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
 
 colorme () {  
+    nn=''
     case "${1:-other}" in  
     	black) 	nn="30";;
         red)    nn="31";;  
@@ -16,6 +17,7 @@ colorme () {
         cyan)   nn="36";;
         white) 	nn="37";;
     esac  
+    bb=''
     case "${2:-other}" in
         black)  bb=";40";;
         red)    bb=";41";;
@@ -26,7 +28,7 @@ colorme () {
         cyan)   bb=";46";;
         white)  bb=";47";;
     esac
-    ff=""  
+    ff=''
     case "${3:-other}" in  
         bold)   ff=";1";;  
         bright) ff=";2";;
