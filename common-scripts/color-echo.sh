@@ -49,6 +49,11 @@ blue_echo () {
     echo $@|colorme blue
 }
 
+## blue to echo 
+bblue_echo () {
+    echo $@|colorme blue '' blink
+}
+
 ## green to echo 
 green_echo () {
     echo $@|colorme green
