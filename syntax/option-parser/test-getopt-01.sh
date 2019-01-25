@@ -8,7 +8,7 @@
 ARG_B=0
 
 # read the options
-TEMP=`getopt -o a::bc: --long arga::,argb,argc: -n 'test.sh' -- "$@"`
+TEMP=`getopt -o a::bc: --long arga::,argb,argc: -n 'test-getopt-01.sh' -- "$@"`
 eval set -- "$TEMP"
 
 # extract options and their arguments into variables.
