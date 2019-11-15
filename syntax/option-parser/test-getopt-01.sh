@@ -8,6 +8,7 @@
 ARG_B=0
 
 # read the options
+# NOTE: The double colons have special meaning, see "man bash" or "man getopt"
 TEMP=`getopt -o a::bc: --long arga::,argb,argc: -n 'test-getopt-01.sh' -- "$@"`
 eval set -- "$TEMP"
 
